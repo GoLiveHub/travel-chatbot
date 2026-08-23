@@ -2,6 +2,17 @@
 // Общая конфигурация API
 declare(strict_types=1);
 
+// Сессия — ДО любых header() вызовов
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 86400 * 7,
+        'path' => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
 const DATA_DIR = __DIR__ . '/../data';
 
 function app_base_url(): string
@@ -178,20 +189,11 @@ function rate_limit(string $key, int $maxRequests, int $windowSeconds): void
 // --- Сессионная авторизация ---
 function auth_start(): void
 {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_set_cookie_params([
-            'lifetime' => 86400 * 7,
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-        session_start();
-    }
+    // Сессия уже запущена в начале config.php
 }
 
 function auth_user(): ?array
 {
-    auth_start();
     return $_SESSION['user'] ?? null;
 }
 
@@ -248,7 +250,6 @@ function auth_login(string $email, string $password): ?array
     if ($user === null) return null;
     if ($user['oauth_provider'] !== null) return null;
     if (!password_verify($password, $user['password_hash'] ?? '')) return null;
-    auth_start();
     $safe = $user;
     unset($safe['password_hash']);
     $_SESSION['user'] = $safe;
@@ -257,7 +258,6 @@ function auth_login(string $email, string $password): ?array
 
 function auth_logout(): void
 {
-    auth_start();
     session_destroy();
 }
 
