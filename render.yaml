@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: travel-chatbot
+    runtime: docker
+    plan: free
+    env: php
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: APP_BASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true

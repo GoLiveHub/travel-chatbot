@@ -1,0 +1,4 @@
+# Запрет прямого доступа к данным
+<FilesMatch "\.(json|log)$">
+    Require all denied
+</FilesMatch>

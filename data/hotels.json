@@ -1,0 +1,1227 @@
+[
+    {
+        "id": 1,
+        "badge": "Классика",
+        "name": "Отель Метрополь",
+        "city": "Москва",
+        "country": "Россия",
+        "price": 9500,
+        "rating": 8.9,
+        "reviews": 312,
+        "images": [
+            "img\/hotel-1.jpg",
+            "img\/hotel-2.jpg",
+            "img\/hotel-3.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "pool",
+            "spa",
+            "bar"
+        ],
+        "center_distance": 0.3,
+        "coordinates": [
+            55.7605,
+            37.6195
+        ],
+        "description": "Исторический отель в самом центре Москвы, в двух шагах от Большого театра и Красной площади. Номера в классическом стиле с современными удобствами.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 2,
+        "name": "Апарт-отель Neva River",
+        "city": "Санкт-Петербург",
+        "country": "Россия",
+        "price": 6800,
+        "rating": 8.6,
+        "reviews": 198,
+        "images": [
+            "img\/hotel-4.jpg",
+            "img\/hotel-5.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "kitchen"
+        ],
+        "center_distance": 0.8,
+        "coordinates": [
+            59.9386,
+            30.3141
+        ],
+        "description": "Современные апартаменты с видом на Неву. Кухня в каждом номере, отличная транспортная доступность до центра Петербурга.",
+        "type": "city",
+        "stars": 4
+    },
+    {
+        "id": 3,
+        "badge": "Хит",
+        "name": "Ривьера Парк Отель",
+        "city": "Сочи",
+        "country": "Россия",
+        "price": 12400,
+        "rating": 9.1,
+        "reviews": 456,
+        "images": [
+            "img\/hotel-6.jpg",
+            "img\/hotel-7.jpg",
+            "img\/hotel-8.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "beach",
+            "spa",
+            "breakfast",
+            "wifi",
+            "gym"
+        ],
+        "center_distance": 2.1,
+        "coordinates": [
+            43.5766,
+            39.8606
+        ],
+        "description": "Первоклассный курортный отель на первой линии с собственным пляжем, бассейнами и спа-комплексом. Идеален для отдыха с семьёй.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 4,
+        "badge": "Выгодно",
+        "name": "Гранд Отель Казань",
+        "city": "Казань",
+        "country": "Россия",
+        "price": 5200,
+        "rating": 8.7,
+        "reviews": 143,
+        "images": [
+            "img\/hotel-9.jpg",
+            "img\/hotel-10.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "gym"
+        ],
+        "center_distance": 0.5,
+        "coordinates": [
+            55.7958,
+            49.1064
+        ],
+        "description": "Элегантный отель в историческом центре Казани рядом с Кремлём и улицей Баумана.",
+        "type": "city",
+        "stars": 4
+    },
+    {
+        "id": 5,
+        "name": "Hotel Roma Centrale",
+        "city": "Рим",
+        "country": "Италия",
+        "price": 14500,
+        "rating": 8.7,
+        "reviews": 230,
+        "images": [
+            "img\/hotel-11.jpg",
+            "img\/hotel-12.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "bar",
+            "airport"
+        ],
+        "center_distance": 0.5,
+        "coordinates": [
+            41.9028,
+            12.4964
+        ],
+        "description": "Уютный отель в самом сердце Рима, в пешей доступности от Колизея и Испанской лестницы.",
+        "type": "city",
+        "stars": 4
+    },
+    {
+        "id": 6,
+        "badge": "Романтика",
+        "name": "Bellevue du Louvre",
+        "city": "Париж",
+        "country": "Франция",
+        "price": 18900,
+        "rating": 9,
+        "reviews": 521,
+        "images": [
+            "img\/hotel-13.jpg",
+            "img\/hotel-14.jpg",
+            "img\/hotel-15.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar",
+            "terrace"
+        ],
+        "center_distance": 0.4,
+        "coordinates": [
+            48.8606,
+            2.3376
+        ],
+        "description": "Бутик-отель в 300 метрах от Лувра. Изящные номера в парижском стиле, терраса с видом на Сену.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 7,
+        "name": "Barcelona Beach Resort",
+        "city": "Барселона",
+        "country": "Испания",
+        "price": 13700,
+        "rating": 8.8,
+        "reviews": 367,
+        "images": [
+            "img\/hotel-16.jpg",
+            "img\/hotel-17.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "beach",
+            "wifi",
+            "breakfast",
+            "gym"
+        ],
+        "center_distance": 1.8,
+        "coordinates": [
+            41.3902,
+            2.1977
+        ],
+        "description": "Стильный курортный отель в 5 минутах от пляжа Барселонета с большим бассейном на крыше.",
+        "type": "beach",
+        "stars": 4
+    },
+    {
+        "id": 8,
+        "badge": "Хит продаж",
+        "name": "Antalya Pearl Hotel",
+        "city": "Анталья",
+        "country": "Турция",
+        "price": 8900,
+        "rating": 8.9,
+        "reviews": 890,
+        "images": [
+            "img\/hotel-18.jpg",
+            "img\/hotel-19.jpg",
+            "img\/hotel-20.jpg"
+        ],
+        "amenities": [
+            "all-inclusive",
+            "pool",
+            "beach",
+            "wifi",
+            "breakfast",
+            "spa",
+            "kid-club"
+        ],
+        "center_distance": 4.2,
+        "coordinates": [
+            36.8523,
+            30.715
+        ],
+        "description": "Популярный отель системы «всё включено» с песчаным пляжем, аквапарком и анимацией для детей.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 9,
+        "name": "Sultanahmet Palace",
+        "city": "Стамбул",
+        "country": "Турция",
+        "price": 7800,
+        "rating": 8.5,
+        "reviews": 189,
+        "images": [
+            "img\/hotel-21.jpg",
+            "img\/hotel-22.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "pool",
+            "bar"
+        ],
+        "center_distance": 0.2,
+        "coordinates": [
+            41.0082,
+            28.9784
+        ],
+        "description": "Отель в историческом квартале Султанахмет с видом на Голубую мечеть и Айя-Софию.",
+        "type": "city",
+        "stars": 4
+    },
+    {
+        "id": 10,
+        "badge": "Премиум",
+        "name": "Burj Lakes Tower",
+        "city": "Дубай",
+        "country": "ОАЭ",
+        "price": 23400,
+        "rating": 9.2,
+        "reviews": 634,
+        "images": [
+            "img\/hotel-23.jpg",
+            "img\/hotel-24.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "spa",
+            "gym",
+            "wifi",
+            "breakfast",
+            "bar",
+            "parking"
+        ],
+        "center_distance": 5,
+        "coordinates": [
+            25.1972,
+            55.2744
+        ],
+        "description": "Небоскрёб-отель с панорамным бассейном на 80 этаже и видом на Бурдж-Халифу и фонтаны.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 11,
+        "name": "Bangkok Garden Retreat",
+        "city": "Бангкок",
+        "country": "Таиланд",
+        "price": 4600,
+        "rating": 8.4,
+        "reviews": 275,
+        "images": [
+            "img\/hotel-25.jpg",
+            "img\/hotel-26.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "wifi",
+            "breakfast",
+            "spa"
+        ],
+        "center_distance": 3,
+        "coordinates": [
+            13.7367,
+            100.5232
+        ],
+        "description": "Зелёный отель с тропическим садом и бассейном в центре Бангкока, недалеко от храма Ват Арун.",
+        "type": "city",
+        "stars": 4
+    },
+    {
+        "id": 12,
+        "name": "Vienna Mozart Suites",
+        "city": "Вена",
+        "country": "Австрия",
+        "price": 11200,
+        "rating": 8.9,
+        "reviews": 154,
+        "images": [
+            "img\/hotel-27.jpg",
+            "img\/hotel-28.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "kitchen",
+            "gym"
+        ],
+        "center_distance": 0.6,
+        "coordinates": [
+            48.2082,
+            16.3738
+        ],
+        "description": "Просторные апартаменты-сьюты с кухней в районе Внутреннего города Вены, рядом с оперой.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 13,
+        "badge": "Камин",
+        "name": "Альпийский Домик",
+        "city": "Сочи",
+        "country": "Россия",
+        "price": 6900,
+        "rating": 8.8,
+        "reviews": 98,
+        "images": [
+            "img\/hotel-29.jpg",
+            "img\/hotel-30.jpg"
+        ],
+        "amenities": [
+            "mountain",
+            "wifi",
+            "parking",
+            "fireplace",
+            "breakfast"
+        ],
+        "center_distance": 38,
+        "coordinates": [
+            43.6775,
+            40.3227
+        ],
+        "description": "Уютный шале-отель высоко в горах Красной Поляны с камином в каждом номере и видом на вершины.",
+        "type": "mountain",
+        "stars": 4
+    },
+    {
+        "id": 14,
+        "badge": "Ski-in \/ Ski-out",
+        "name": "Вершина Кавказа",
+        "city": "Сочи",
+        "country": "Россия",
+        "price": 8400,
+        "rating": 9,
+        "reviews": 121,
+        "images": [
+            "img\/hotel-31.jpg",
+            "img\/hotel-32.jpg"
+        ],
+        "amenities": [
+            "mountain",
+            "ski",
+            "spa",
+            "wifi",
+            "breakfast",
+            "gym",
+            "pool"
+        ],
+        "center_distance": 42,
+        "coordinates": [
+            43.67,
+            40.28
+        ],
+        "description": "Горнолыжный отель у подъёмников Розы Хутор. Ski-in \/ ski-out, тёплый бассейн и отличная спа-зона.",
+        "type": "mountain",
+        "stars": 5
+    },
+    {
+        "id": 15,
+        "badge": "Выгодно",
+        "name": "Лазурный Берег",
+        "city": "Сочи",
+        "country": "Россия",
+        "price": 5600,
+        "rating": 8.3,
+        "reviews": 176,
+        "images": [
+            "img\/hotel-33.jpg",
+            "img\/hotel-34.jpg"
+        ],
+        "amenities": [
+            "beach",
+            "pool",
+            "wifi",
+            "breakfast"
+        ],
+        "center_distance": 1.2,
+        "coordinates": [
+            43.59,
+            39.72
+        ],
+        "description": "Уютный отель в Имеретинской низменности, 10 минут пешком до Олимпийского парка и моря.",
+        "type": "beach",
+        "stars": 4
+    },
+    {
+        "id": 16,
+        "name": "Hôtel Étoile Montmartre",
+        "city": "Париж",
+        "country": "Франция",
+        "price": 9800,
+        "rating": 8.2,
+        "reviews": 310,
+        "images": [
+            "img\/hotel-35.jpg",
+            "img\/hotel-36.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "bar"
+        ],
+        "center_distance": 2.4,
+        "coordinates": [
+            48.8867,
+            2.3431
+        ],
+        "description": "Очаровательный отель в богемном районе Монмартр с видом на Сакре-Кёр.",
+        "type": "city",
+        "stars": 3
+    },
+    {
+        "id": 17,
+        "name": "Trastevere Terrace Hotel",
+        "city": "Рим",
+        "country": "Италия",
+        "price": 11800,
+        "rating": 8.8,
+        "reviews": 204,
+        "images": [
+            "img\/hotel-37.jpg",
+            "img\/hotel-38.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "bar",
+            "terrace"
+        ],
+        "center_distance": 1.5,
+        "coordinates": [
+            41.8859,
+            12.469
+        ],
+        "description": "Отель с террасой на крыше в аутентичном квартале Трастевере, среди ресторанов и виноделен.",
+        "type": "city",
+        "stars": 4
+    },
+    {
+        "id": 18,
+        "name": "Costa Brava Inn",
+        "city": "Барселона",
+        "country": "Испания",
+        "price": 10200,
+        "rating": 8.6,
+        "reviews": 142,
+        "images": [
+            "img\/hotel-39.jpg",
+            "img\/hotel-40.jpg"
+        ],
+        "amenities": [
+            "beach",
+            "pool",
+            "wifi",
+            "breakfast",
+            "parking"
+        ],
+        "center_distance": 3.5,
+        "coordinates": [
+            41.42,
+            2.23
+        ],
+        "description": "Спокойный отель у прибрежной зоны с большим открытым бассейном и завтраками в средиземноморском стиле.",
+        "type": "beach",
+        "stars": 4
+    },
+    {
+        "id": 19,
+        "name": "Петергофский Двор",
+        "city": "Санкт-Петербург",
+        "country": "Россия",
+        "price": 5400,
+        "rating": 8.1,
+        "reviews": 87,
+        "images": [
+            "img\/hotel-41.jpg",
+            "img\/hotel-42.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "parking"
+        ],
+        "center_distance": 29,
+        "coordinates": [
+            59.885,
+            29.9047
+        ],
+        "description": "Отель в тихом парке у Большого Петергофского дворца и фонтанов.",
+        "type": "city",
+        "stars": 3
+    },
+    {
+        "id": 20,
+        "badge": "Бюджетно",
+        "name": "Сокольники Lodge",
+        "city": "Москва",
+        "country": "Россия",
+        "price": 4100,
+        "rating": 7.9,
+        "reviews": 64,
+        "images": [
+            "img\/hotel-43.jpg",
+            "img\/hotel-44.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "parking",
+            "breakfast"
+        ],
+        "center_distance": 6,
+        "coordinates": [
+            55.8067,
+            37.676
+        ],
+        "description": "Недорогой уютный отель рядом с парком Сокольники. Идеален для деловых поездок.",
+        "type": "city",
+        "stars": 3
+    },
+    {
+        "id": 21,
+        "badge": "Премиум",
+        "name": "Burj Al Arab Jumeirah",
+        "city": "Дубай",
+        "country": "ОАЭ",
+        "price": 89000,
+        "rating": 9.8,
+        "reviews": 2451,
+        "images": [
+            "img\/hotel-45.jpg",
+            "img\/hotel-46.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "beach",
+            "spa",
+            "wifi",
+            "breakfast",
+            "bar",
+            "parking",
+            "gym"
+        ],
+        "center_distance": 9,
+        "coordinates": [
+            25.1412,
+            55.1853
+        ],
+        "description": "Легендарный ультралюксовый отель-парус на искусственном острове в заливе Джумейра. Гелипорт, панорамные люксы и персональный сервис.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 22,
+        "badge": "Хит продаж",
+        "name": "Atlantis, The Palm",
+        "city": "Дубай",
+        "country": "ОАЭ",
+        "price": 56000,
+        "rating": 9.4,
+        "reviews": 3204,
+        "images": [
+            "img\/hotel-47.jpg",
+            "img\/hotel-48.jpg"
+        ],
+        "amenities": [
+            "all-inclusive",
+            "pool",
+            "beach",
+            "spa",
+            "wifi",
+            "breakfast",
+            "kid-club",
+            "gym"
+        ],
+        "center_distance": 12,
+        "coordinates": [
+            25.1307,
+            55.1175
+        ],
+        "description": "Курортный комплекс на Пальме Джумейра с аквапарком Aquaventure и океанариумом Lost Chambers.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 23,
+        "badge": "Премиум",
+        "name": "Hotel Sacher Wien",
+        "city": "Вена",
+        "country": "Австрия",
+        "price": 27000,
+        "rating": 9.6,
+        "reviews": 1890,
+        "images": [
+            "img\/hotel-49.jpg",
+            "img\/hotel-50.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar"
+        ],
+        "center_distance": 0.3,
+        "coordinates": [
+            48.2035,
+            16.3701
+        ],
+        "description": "Легендарный отель напротив Венской оперы — родина знаменитого торта «Захер». Классический барочный люкс.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 24,
+        "badge": "Премиум",
+        "name": "Çırağan Palace Kempinski",
+        "city": "Стамбул",
+        "country": "Турция",
+        "price": 52000,
+        "rating": 9.5,
+        "reviews": 1120,
+        "images": [
+            "img\/hotel-51.jpg",
+            "img\/hotel-52.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "spa",
+            "wifi",
+            "breakfast",
+            "bar",
+            "parking",
+            "terrace"
+        ],
+        "center_distance": 4.5,
+        "coordinates": [
+            41.0455,
+            29.0116
+        ],
+        "description": "Бывший османский дворец на берегу Босфора с собственным причалом, мраморными ваннами и панорамным спа.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 25,
+        "badge": "Премиум",
+        "name": "Hôtel Ritz Paris",
+        "city": "Париж",
+        "country": "Франция",
+        "price": 61000,
+        "rating": 9.7,
+        "reviews": 1567,
+        "images": [
+            "img\/hotel-53.jpg",
+            "img\/hotel-54.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar",
+            "gym"
+        ],
+        "center_distance": 0.8,
+        "coordinates": [
+            48.8678,
+            2.3289
+        ],
+        "description": "Культовый дворец-отель на площади Вандом. Здесь жили Шанель, Хемингуэй и Одри Хепбёрн.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 26,
+        "badge": "Хит продаж",
+        "name": "Radisson Collection «Украина»",
+        "city": "Москва",
+        "country": "Россия",
+        "price": 19000,
+        "rating": 9.1,
+        "reviews": 2403,
+        "images": [
+            "img\/hotel-55.jpg",
+            "img\/hotel-56.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar",
+            "parking",
+            "gym",
+            "pool"
+        ],
+        "center_distance": 2.5,
+        "coordinates": [
+            55.7517,
+            37.5655
+        ],
+        "description": "Одна из семи сталинских высоток на набережной Москвы-реки, в 10 минутах от Кремля. Панорамный ресторан на 28 этаже.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 27,
+        "badge": "Премиум",
+        "name": "Park Hyatt Tokyo",
+        "city": "Токио",
+        "country": "Япония",
+        "price": 42000,
+        "rating": 9.6,
+        "reviews": 1320,
+        "images": [
+            "img\/hotel-57.jpg",
+            "img\/hotel-58.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "bar",
+            "pool"
+        ],
+        "center_distance": 5,
+        "coordinates": [
+            35.6865,
+            139.6918
+        ],
+        "description": "Культовый отель в небоскрёбе Shinjuku Park Tower — именно отсюда снимали «Трудности перевода». Бассейн на 47 этаже и бар с видом на Фудзи.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 28,
+        "badge": "Премиум",
+        "name": "The Peninsula Tokyo",
+        "city": "Токио",
+        "country": "Япония",
+        "price": 38000,
+        "rating": 9.5,
+        "reviews": 980,
+        "images": [
+            "img\/hotel-59.jpg",
+            "img\/hotel-60.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "pool",
+            "bar"
+        ],
+        "center_distance": 1.5,
+        "coordinates": [
+            35.6792,
+            139.7655
+        ],
+        "description": "Эталон японского сервиса в шаге от императорского дворца. Спа с онсэном и панорамные окна на Маруноути.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 29,
+        "badge": "Премиум",
+        "name": "The Savoy",
+        "city": "Лондон",
+        "country": "Великобритания",
+        "price": 51000,
+        "rating": 9.6,
+        "reviews": 2140,
+        "images": [
+            "img\/hotel-61.jpg",
+            "img\/hotel-62.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar",
+            "gym"
+        ],
+        "center_distance": 1,
+        "coordinates": [
+            51.51,
+            -0.1216
+        ],
+        "description": "Легендарный отель на набережной Темзы, где останавливались Моэм, Уайльд и Черчилль. Арт-деко люксы и знаменитый коктейль-бар American Bar.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 30,
+        "badge": "Премиум",
+        "name": "The Ritz London",
+        "city": "Лондон",
+        "country": "Великобритания",
+        "price": 46000,
+        "rating": 9.7,
+        "reviews": 1830,
+        "images": [
+            "img\/hotel-63.jpg",
+            "img\/hotel-64.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar"
+        ],
+        "center_distance": 1.5,
+        "coordinates": [
+            51.507,
+            -0.142
+        ],
+        "description": "Отель-дворец в стиле Людовика XVI на Пикадилли. Послеполуденный чай в Ритце — одно из главных лондонских удовольствий.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 31,
+        "badge": "Премиум",
+        "name": "The Plaza",
+        "city": "Нью-Йорк",
+        "country": "США",
+        "price": 54000,
+        "rating": 9.5,
+        "reviews": 3012,
+        "images": [
+            "img\/hotel-65.jpg",
+            "img\/hotel-66.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "bar",
+            "parking"
+        ],
+        "center_distance": 0.3,
+        "coordinates": [
+            40.7644,
+            -73.9743
+        ],
+        "description": "Королева нью-йоркских отелей на углу Центрального парка. Знаменитые люксы, где снимали «Один дома 2».",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 32,
+        "badge": "Хит продаж",
+        "name": "Waldorf Astoria",
+        "city": "Нью-Йорк",
+        "country": "США",
+        "price": 47000,
+        "rating": 9.3,
+        "reviews": 2670,
+        "images": [
+            "img\/hotel-67.jpg",
+            "img\/hotel-68.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "bar",
+            "parking"
+        ],
+        "center_distance": 1.8,
+        "coordinates": [
+            40.7567,
+            -73.9736
+        ],
+        "description": "Икона Парк-авеню. Здесь был придуман знаменитый салат «Вальдорф» и блюз-бар с джазом по вечерам.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 33,
+        "badge": "Премиум",
+        "name": "Four Seasons Prague",
+        "city": "Прага",
+        "country": "Чехия",
+        "price": 28000,
+        "rating": 9.4,
+        "reviews": 1150,
+        "images": [
+            "img\/hotel-69.jpg",
+            "img\/hotel-70.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "bar",
+            "parking",
+            "pool",
+            "terrace"
+        ],
+        "center_distance": 0.9,
+        "coordinates": [
+            50.0878,
+            14.4124
+        ],
+        "description": "Элегантный отель на берегу Влтавы с видом на Карлов мост и Пражский град. Спа с бассейном и террасами.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 34,
+        "badge": "Хит продаж",
+        "name": "Hotel Kings Court",
+        "city": "Прага",
+        "country": "Чехия",
+        "price": 14500,
+        "rating": 9.1,
+        "reviews": 1520,
+        "images": [
+            "img\/hotel-71.jpg",
+            "img\/hotel-72.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "bar"
+        ],
+        "center_distance": 0.4,
+        "coordinates": [
+            50.088,
+            14.4378
+        ],
+        "description": "Дизайнерский отель в пяти минутах от Староместской площади. Стеклянный атриум и панорамный ресторан на крыше.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 35,
+        "badge": "Романтика",
+        "name": "Hotel Pulitzer",
+        "city": "Амстердам",
+        "country": "Нидерланды",
+        "price": 24000,
+        "rating": 9.2,
+        "reviews": 1210,
+        "images": [
+            "img\/hotel-73.jpg",
+            "img\/hotel-74.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "bar",
+            "terrace"
+        ],
+        "center_distance": 0.6,
+        "coordinates": [
+            52.3709,
+            4.8831
+        ],
+        "description": "Отель из 25 канальных домов XVII века, соединённых лабиринтом внутренних двориков. Секретные сады и бар Jansz.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 36,
+        "badge": "Премиум",
+        "name": "Conservatorium Hotel",
+        "city": "Амстердам",
+        "country": "Нидерланды",
+        "price": 31000,
+        "rating": 9.3,
+        "reviews": 890,
+        "images": [
+            "img\/hotel-75.jpg",
+            "img\/hotel-76.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "pool",
+            "bar"
+        ],
+        "center_distance": 1.8,
+        "coordinates": [
+            52.3579,
+            4.8781
+        ],
+        "description": "Бывшая консерватория Свелинка превращена в фешенебельный отель напротив музея Ван Гога. Стеклянный атриум-витраж.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 37,
+        "badge": "Премиум",
+        "name": "Mystique Santorini",
+        "city": "Санторини",
+        "country": "Греция",
+        "price": 36000,
+        "rating": 9.6,
+        "reviews": 720,
+        "images": [
+            "img\/hotel-77.jpg",
+            "img\/hotel-78.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "spa",
+            "wifi",
+            "breakfast",
+            "bar",
+            "terrace"
+        ],
+        "center_distance": 1.2,
+        "coordinates": [
+            36.4197,
+            25.433
+        ],
+        "description": "Бутик-отель на кальдере с видом на вулкан и знаменитые закаты Ии. Бесконечный бассейн и ужины на уступах.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 38,
+        "badge": "Премиум",
+        "name": "Andronis Arcadia Santorini",
+        "city": "Санторини",
+        "country": "Греция",
+        "price": 39000,
+        "rating": 9.5,
+        "reviews": 610,
+        "images": [
+            "img\/hotel-79.jpg",
+            "img\/hotel-80.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "wifi",
+            "breakfast",
+            "spa",
+            "bar",
+            "terrace"
+        ],
+        "center_distance": 0.8,
+        "coordinates": [
+            36.4148,
+            25.4305
+        ],
+        "description": "Отель-пещера в традиционном стиле: купола, белые дворики и бассейны, спускающиеся к морю. Тишина и приватность.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 39,
+        "badge": "Премиум",
+        "name": "Amanpuri Resort",
+        "city": "Пхукет",
+        "country": "Таиланд",
+        "price": 58000,
+        "rating": 9.8,
+        "reviews": 540,
+        "images": [
+            "img\/hotel-81.jpg",
+            "img\/hotel-82.jpg"
+        ],
+        "amenities": [
+            "pool",
+            "beach",
+            "spa",
+            "wifi",
+            "breakfast",
+            "gym",
+            "bar"
+        ],
+        "center_distance": 6,
+        "coordinates": [
+            7.9906,
+            98.2847
+        ],
+        "description": "Первый отель Aman в мире — тайские пагоды на склоне холма над пляжем Панора. Собственный пляж и спа-церемонии.",
+        "type": "beach",
+        "stars": 5
+    },
+    {
+        "id": 40,
+        "badge": "Хит продаж",
+        "name": "The Biltmore Tbilisi",
+        "city": "Тбилиси",
+        "country": "Грузия",
+        "price": 21000,
+        "rating": 9.2,
+        "reviews": 940,
+        "images": [
+            "img\/hotel-83.jpg",
+            "img\/hotel-84.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "bar",
+            "pool",
+            "parking"
+        ],
+        "center_distance": 1,
+        "coordinates": [
+            41.7017,
+            44.7979
+        ],
+        "description": "Две стеклянные башни над старым Тбилиси. Панорамный бар на последнем этаже с видом на Мтацминду и Куру.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 41,
+        "badge": "Романтика",
+        "name": "Stamba Hotel",
+        "city": "Тбилиси",
+        "country": "Грузия",
+        "price": 17000,
+        "rating": 9.3,
+        "reviews": 780,
+        "images": [
+            "img\/hotel-85.jpg",
+            "img\/hotel-86.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "bar",
+            "terrace",
+            "gym"
+        ],
+        "center_distance": 1.5,
+        "coordinates": [
+            41.6993,
+            44.7996
+        ],
+        "description": "Бывшая советская типография превращена в дизайн-отель: бетон, латунь и бархат. Крытый двор с камином и архивное кафе.",
+        "type": "city",
+        "stars": 5
+    },
+    {
+        "id": 42,
+        "badge": "Премиум",
+        "name": "Mandarin Oriental Bangkok",
+        "city": "Бангкок",
+        "country": "Таиланд",
+        "price": 33000,
+        "rating": 9.7,
+        "reviews": 2010,
+        "images": [
+            "img\/hotel-87.jpg",
+            "img\/hotel-88.jpg"
+        ],
+        "amenities": [
+            "wifi",
+            "breakfast",
+            "spa",
+            "gym",
+            "pool",
+            "bar"
+        ],
+        "center_distance": 3,
+        "coordinates": [
+            13.7247,
+            100.515
+        ],
+        "description": "Старейший отель-люкс Таиланда на берегу Чао-Прайи. Авторский чай, спа и знаменитый автор Бангкок.",
+        "type": "city",
+        "stars": 5
+    }
+]

@@ -1,0 +1,142 @@
+[
+    {
+        "name": "Москва",
+        "country": "Россия",
+        "lat": 55.7558,
+        "lon": 37.6173,
+        "image": "img\/city-1.jpg"
+    },
+    {
+        "name": "Санкт-Петербург",
+        "country": "Россия",
+        "lat": 59.9343,
+        "lon": 30.3351,
+        "image": "img\/city-2.jpg"
+    },
+    {
+        "name": "Сочи",
+        "country": "Россия",
+        "lat": 43.6028,
+        "lon": 39.7342,
+        "image": "img\/city-3.jpg"
+    },
+    {
+        "name": "Казань",
+        "country": "Россия",
+        "lat": 55.7964,
+        "lon": 49.1089,
+        "image": "img\/city-4.jpg"
+    },
+    {
+        "name": "Париж",
+        "country": "Франция",
+        "lat": 48.8566,
+        "lon": 2.3522,
+        "image": "img\/city-5.jpg"
+    },
+    {
+        "name": "Рим",
+        "country": "Италия",
+        "lat": 41.9028,
+        "lon": 12.4964,
+        "image": "img\/city-6.jpg"
+    },
+    {
+        "name": "Барселона",
+        "country": "Испания",
+        "lat": 41.3874,
+        "lon": 2.1686,
+        "image": "img\/city-7.jpg"
+    },
+    {
+        "name": "Анталья",
+        "country": "Турция",
+        "lat": 36.8969,
+        "lon": 30.7133,
+        "image": "img\/city-8.jpg"
+    },
+    {
+        "name": "Стамбул",
+        "country": "Турция",
+        "lat": 41.0082,
+        "lon": 28.9784,
+        "image": "img\/city-9.jpg"
+    },
+    {
+        "name": "Дубай",
+        "country": "ОАЭ",
+        "lat": 25.2048,
+        "lon": 55.2708,
+        "image": "img\/city-10.jpg"
+    },
+    {
+        "name": "Бангкок",
+        "country": "Таиланд",
+        "lat": 13.7563,
+        "lon": 100.5018,
+        "image": "img\/city-11.jpg"
+    },
+    {
+        "name": "Вена",
+        "country": "Австрия",
+        "lat": 48.2082,
+        "lon": 16.3738,
+        "image": "img\/city-12.jpg"
+    },
+    {
+        "name": "Токио",
+        "country": "Япония",
+        "lat": 35.6762,
+        "lon": 139.6503,
+        "image": "img\/city-13.jpg"
+    },
+    {
+        "name": "Лондон",
+        "country": "Великобритания",
+        "lat": 51.5074,
+        "lon": -0.1278,
+        "image": "img\/city-14.jpg"
+    },
+    {
+        "name": "Нью-Йорк",
+        "country": "США",
+        "lat": 40.7128,
+        "lon": -74.006,
+        "image": "img\/city-15.jpg"
+    },
+    {
+        "name": "Прага",
+        "country": "Чехия",
+        "lat": 50.0755,
+        "lon": 14.4378,
+        "image": "img\/city-16.jpg"
+    },
+    {
+        "name": "Амстердам",
+        "country": "Нидерланды",
+        "lat": 52.3676,
+        "lon": 4.9041,
+        "image": "img\/city-17.jpg"
+    },
+    {
+        "name": "Санторини",
+        "country": "Греция",
+        "lat": 36.3932,
+        "lon": 25.4615,
+        "image": "img\/city-18.jpg"
+    },
+    {
+        "name": "Пхукет",
+        "country": "Таиланд",
+        "lat": 7.8804,
+        "lon": 98.3923,
+        "image": "img\/city-19.jpg"
+    },
+    {
+        "name": "Тбилиси",
+        "country": "Грузия",
+        "lat": 41.7151,
+        "lon": 44.8271,
+        "image": "img\/city-20.jpg"
+    }
+]
