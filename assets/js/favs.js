@@ -1,6 +1,7 @@
 // Управление избранным (localStorage + cookie для счётчика в шапке)
 (function () {
   const KEY = 'travel_favs';
+  let favBusy = false;
 
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
@@ -8,8 +9,8 @@
   }
 
   function write(list) {
-    localStorage.setItem(KEY, JSON.stringify(list));
-    document.cookie = 'travel_favs=' + encodeURIComponent(JSON.stringify(list)) + ';path=/;max-age=31536000';
+    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+    try { document.cookie = 'travel_favs=' + encodeURIComponent(JSON.stringify(list)) + ';path=/;max-age=31536000'; } catch (e) {}
     updateBadge(list.length);
     updateButtons(list);
     document.dispatchEvent(new CustomEvent('favs:changed', { detail: list }));
@@ -35,6 +36,9 @@
   }
 
   function toggle(id) {
+    if (favBusy) return;
+    favBusy = true;
+    setTimeout(() => { favBusy = false; }, 300);
     const list = read();
     const i = list.indexOf(String(id));
     if (i >= 0) list.splice(i, 1); else list.push(String(id));
@@ -53,6 +57,14 @@
     }
   });
 
+  window.addEventListener('storage', (e) => {
+    if (e.key === KEY) {
+      const list = read();
+      updateBadge(list.length);
+      updateButtons(list);
+    }
+  });
+
   window.travelFavs = {
     read,
     toggle,
@@ -60,7 +72,6 @@
     isFav: (id) => read().includes(String(id)),
   };
 
-  // Инициализация при загрузке
   const list = read();
   updateBadge(list.length);
   updateButtons(list);

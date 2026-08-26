@@ -8,6 +8,14 @@
     : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   if (dark) document.documentElement.classList.add('dark');
 
+  if (!saved && window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mq.addEventListener('change', function (e) {
+      document.documentElement.classList.toggle('dark', e.matches);
+      syncIcon();
+    });
+  }
+
   function syncIcon() {
     var btn = document.getElementById('theme-toggle');
     if (!btn) return;

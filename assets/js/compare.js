@@ -20,6 +20,9 @@
     save();
     syncButtons();
     renderBar();
+    if (document.body.dataset.page === 'compare') {
+      history.replaceState({}, '', '/compare.php?ids=' + items.map((x) => x.id).join(','));
+    }
     document.dispatchEvent(new CustomEvent('compare:changed'));
   }
 
@@ -54,6 +57,8 @@
     renderBar();
   }
 
-  window.travelCompare = { list: list, isIn: isIn, toggle: toggle, clear: clear, syncButtons: syncButtons };
+  function isEmpty() { return items.length === 0; }
+
+  window.travelCompare = { list: list, isIn: isIn, toggle: toggle, clear: clear, syncButtons: syncButtons, isEmpty: isEmpty };
   init();
 })();

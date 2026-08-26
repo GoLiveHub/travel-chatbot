@@ -7,6 +7,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     h_error('Метод не поддерживается', 405);
 }
 if (request_is_too_large()) h_error('Слишком большой запрос', 413);
+csrf_check();
 
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) {

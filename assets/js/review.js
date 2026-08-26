@@ -30,6 +30,10 @@
       alert('Заполните имя и текст отзыва.');
       return;
     }
+    if (payload.rating < 1 || payload.rating > 10) {
+      alert('Оценка должна быть от 1 до 10.');
+      return;
+    }
     const old = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Отправляем…';
@@ -46,7 +50,8 @@
         msg.textContent = data.message;
       }
       form.querySelector('textarea').value = '';
-      form.querySelector('input').value = '';
+      document.getElementById('review-author').value = '';
+      document.getElementById('review-text').value = '';
       const list = document.getElementById('user-reviews');
       if (list) {
         const card = document.createElement('div');

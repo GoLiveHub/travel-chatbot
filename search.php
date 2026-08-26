@@ -61,7 +61,9 @@ $guests = max(1, min(8, (int) ($_GET['guests'] ?? 2)));
             </form>
             <div id="recent-searches" class="mb-6 hidden flex flex-wrap items-center gap-2"></div>
 
-            <div id="hotel-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
+            <div id="hotel-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <noscript><div class="col-span-full p-8 text-center text-slate-600">Для работы поиска необходим JavaScript. <a href="/" class="text-teal-600 underline">Вернуться на главную</a>.</div></noscript>
+            </div>
             <div id="empty-state" class="hidden rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
                 <div class="flex justify-center text-slate-300"><svg class="h-14 w-14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></div>
                 <p class="mt-3 font-semibold text-slate-600">По вашим фильтрам ничего не нашлось</p>

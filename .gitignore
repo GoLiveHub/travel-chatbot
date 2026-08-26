@@ -20,3 +20,10 @@ Thumbs.db
 
 # ENV
 .env
+
+# Composer
+vendor/
+composer.lock
+
+# ML model cache
+data/ml_model.cache

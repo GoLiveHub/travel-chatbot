@@ -19,7 +19,9 @@ if ($hotel) {
     // Пользовательские отзывы из журнала reviews.log
     $revLogPath = data_path('reviews.log');
     if (file_exists($revLogPath)) {
-        foreach (array_reverse(file($revLogPath)) as $line) {
+        $revLines = file($revLogPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if (is_array($revLines)) {
+            foreach (array_reverse($revLines) as $line) {
             if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \| (.*)$/', trim($line), $m)) {
                 $data = json_decode($m[1], true);
                 if (is_array($data) && (int) ($data['hotel_id'] ?? 0) === $id) {
@@ -28,6 +30,7 @@ if ($hotel) {
             }
         }
         $userReviews = array_slice($userReviews, 0, 5);
+        }
     }
 
     $related = array_values(array_filter($hotels, fn($h) => $h['id'] !== $hotel['id'] && $h['city'] === $hotel['city']));
@@ -98,18 +101,23 @@ try {
     {
       "@context": "https://schema.org",
       "@type": "Hotel",
-      "name": <?= json_encode($hotel['name'], JSON_UNESCAPED_UNICODE) ?>,
-      "description": <?= json_encode($hotel['description'], JSON_UNESCAPED_UNICODE) ?>,
-      "image": <?= json_encode($baseUrl . '/assets/' . ($hotel['images'][0] ?? 'img/hotel-1.jpg')) ?>,
-      "starRating": { "@type": "Rating", "ratingValue": "<?= (int) $hotel['stars'] ?>" },
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "<?= number_format($hotel['rating'], 1, '.', '') ?>", "bestRating": "10", "reviewCount": "<?= (int) $hotel['reviews'] ?>" },
-      "address": { "@type": "PostalAddress", "addressLocality": <?= json_encode($hotel['city'], JSON_UNESCAPED_UNICODE) ?>, "addressCountry": <?= json_encode($hotel['country'], JSON_UNESCAPED_UNICODE) ?> },
+      "name": <?= json_encode($hotel['name'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+      "description": <?= json_encode($hotel['description'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+      "image": <?= json_encode($baseUrl . '/assets/' . ($hotel['images'][0] ?? 'img/hotel-1.jpg'), JSON_HEX_TAG | JSON_HEX_AMP) ?>,
+      "starRating": { "@type": "Rating", "ratingValue": "<?= (int) ($hotel['stars'] ?? 0) ?>" },
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "<?= number_format((float) ($hotel['rating'] ?? 0), 1, '.', '') ?>", "bestRating": "10", "reviewCount": "<?= (int) ($hotel['reviews'] ?? 0) ?>" },
+      "address": { "@type": "PostalAddress", "addressLocality": <?= json_encode($hotel['city'] ?? '', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>, "addressCountry": <?= json_encode($hotel['country'] ?? '', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?> },
       <?php if (isset($hotel['coordinates'][0], $hotel['coordinates'][1])): ?>
       "geo": { "@type": "GeoCoordinates", "latitude": "<?= $hotel['coordinates'][0] ?>", "longitude": "<?= $hotel['coordinates'][1] ?>" },
       <?php endif; ?>
       "priceRange": "<?= (int) $hotel['price'] ?> RUB за ночь"
     }
     </script>
+    <link rel="canonical" href="<?= $baseUrl ?>/hotel.php?id=<?= $hotel['id'] ?>">
+    <meta property="og:title" content="<?= htmlspecialchars($hotel['name']) ?> — бронирование">
+    <meta property="og:description" content="<?= htmlspecialchars($hotel['description']) ?>">
+    <meta property="og:image" content="<?= $baseUrl ?>/assets/<?= htmlspecialchars($hotel['images'][0] ?? 'img/hotel-1.jpg') ?>">
+    <meta property="og:url" content="<?= $baseUrl ?>/hotel.php?id=<?= $hotel['id'] ?>">
     <?php endif; ?>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
@@ -128,6 +136,11 @@ try {
 <?php
 $mainImg = isset($hotel['images'][0]) ? '/assets/' . $hotel['images'][0] : '/assets/img/hotel-1.jpg';
 $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
+$hotelStars = (int) ($hotel['stars'] ?? 0);
+$hotelRating = (float) ($hotel['rating'] ?? 0);
+$hotelReviews = (int) ($hotel['reviews'] ?? 0);
+$hotelAmenities = $hotel['amenities'] ?? [];
+$hotelBadge = $hotel['badge'] ?? '';
 ?>
 
 <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -145,13 +158,13 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
             <div id="gallery">
                 <div class="relative overflow-hidden rounded-2xl">
                     <img id="gallery-main" src="<?= htmlspecialchars($mainImg) ?>" alt="<?= htmlspecialchars($hotel['name']) ?>" class="aspect-[16/9] w-full object-cover" onerror="this.src='/assets/img/hotel-1.jpg'">
-                    <span class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-slate-800 shadow"><?= str_repeat('★', $hotel['stars']) ?></span>
+                    <span class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-slate-800 shadow"><?= str_repeat('★', $hotelStars) ?></span>
                 </div>
                 <?php if (count($extraImgs) > 1): ?>
                 <div class="mt-3 grid grid-cols-4 gap-3">
                     <?php foreach ($extraImgs as $i => $img): ?>
                         <button type="button" data-src="/assets/<?= htmlspecialchars($img) ?>" class="overflow-hidden rounded-xl <?= $i === 0 ? 'ring-2 ring-teal-500' : '' ?>">
-                            <img src="/assets/<?= htmlspecialchars($img) ?>" alt="" class="aspect-video w-full object-cover" loading="lazy" onerror="this.src='/assets/img/hotel-1.jpg'">
+                            <img src="/assets/<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($hotel['name'] . ' — фото ' . ($i + 1)) ?>" class="aspect-video w-full object-cover" loading="lazy" onerror="this.src='/assets/img/hotel-1.jpg'">
                         </button>
                     <?php endforeach; ?>
                 </div>
@@ -163,17 +176,17 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
                 <div>
                     <h1 class="text-3xl font-extrabold text-slate-900"><?= htmlspecialchars($hotel['name']) ?></h1>
                     <p class="mt-1 text-slate-500"><?= htmlspecialchars($hotel['city']) ?>, <?= htmlspecialchars($hotel['country']) ?>
-                        <?php if (!empty($hotel['badge'])): ?>
-                            <span class="ml-2 rounded-full bg-teal-500 px-2.5 py-0.5 text-xs font-bold text-white"><?= htmlspecialchars($hotel['badge']) ?></span>
+                        <?php if (!empty($hotelBadge)): ?>
+                            <span class="ml-2 rounded-full bg-teal-500 px-2.5 py-0.5 text-xs font-bold text-white"><?= htmlspecialchars($hotelBadge) ?></span>
                         <?php endif; ?>
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
-                        <div class="text-lg font-extrabold text-slate-900"><?= number_format($hotel['rating'], 1, '.', '') ?></div>
-                        <div class="text-xs text-slate-400"><?= (int) $hotel['reviews'] ?> отзывов</div>
+                        <div class="text-lg font-extrabold text-slate-900"><?= number_format($hotelRating, 1, '.', '') ?></div>
+                        <div class="text-xs text-slate-400"><?= $hotelReviews ?> отзывов</div>
                     </div>
-                    <div class="grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-lg font-extrabold text-white"><?= number_format($hotel['rating'], 1, '.', '') ?></div>
+                    <div class="grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-lg font-extrabold text-white"><?= number_format($hotelRating, 1, '.', '') ?></div>
                 </div>
             </div>
 
@@ -190,7 +203,7 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
 
                 <h3 class="mt-6 font-bold text-slate-900">Удобства</h3>
                 <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    <?php foreach ($hotel['amenities'] as $a): ?>
+                    <?php foreach ($hotelAmenities as $a): ?>
                         <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
                             <span class="text-emerald-500">✓</span> <?= htmlspecialchars($amenityLabels[$a] ?? $a) ?>
                         </div>
@@ -213,7 +226,7 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
             <?php if ($catScores): ?>
             <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
                 <h2 class="text-lg font-bold text-slate-900">Оценка по критериям</h2>
-                <p class="mt-1 text-sm text-slate-400">Средняя оценка гостей по категориям (из <?= (int) $hotel['reviews'] ?> отзывов)</p>
+                <p class="mt-1 text-sm text-slate-400">Средняя оценка гостей по категориям (из <?= $hotelReviews ?> отзывов)</p>
                 <div class="mt-4 space-y-3">
                     <?php foreach ($catScores as $cat => $score): ?>
                         <div class="flex items-center gap-3">
@@ -302,29 +315,29 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
                     <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">✓ Бесплатная отмена</span>
                 </div>
 
-                <form id="booking-form" class="mt-6 space-y-4">
-                    <input type="hidden" id="booking-hotel-id" value="<?= (int) $hotel['id'] ?>">
+                <form id="booking-form" action="/api/booking.php" method="post" class="mt-6 space-y-4">
+                    <input type="hidden" id="booking-hotel-id" name="hotel_id" value="<?= (int) $hotel['id'] ?>">
                     <div>
                         <label for="booking-name" class="mb-1 block text-sm font-medium text-slate-700">Имя</label>
-                        <input id="booking-name" type="text" placeholder="Иван" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-teal-500 focus:outline-none">
+                        <input id="booking-name" name="name" type="text" placeholder="Иван" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-teal-500 focus:outline-none">
                     </div>
                     <div>
                         <label for="booking-phone" class="mb-1 block text-sm font-medium text-slate-700">Телефон</label>
-                        <input id="booking-phone" type="tel" placeholder="+7 (900) 000-00-00" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-teal-500 focus:outline-none">
+                        <input id="booking-phone" name="phone" type="tel" placeholder="+7 (900) 000-00-00" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-teal-500 focus:outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="booking-checkin" class="mb-1 block text-sm font-medium text-slate-700">Заезд</label>
-                            <input id="booking-checkin" type="date" value="<?= $defaultCheckin ?>" min="<?= $today ?>" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:outline-none">
+                            <input id="booking-checkin" name="checkin" type="date" value="<?= $defaultCheckin ?>" min="<?= $today ?>" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:outline-none">
                         </div>
                         <div>
                             <label for="booking-checkout" class="mb-1 block text-sm font-medium text-slate-700">Выезд</label>
-                            <input id="booking-checkout" type="date" value="<?= $defaultCheckout ?>" min="<?= $defaultCheckin ?>" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:outline-none">
+                            <input id="booking-checkout" name="checkout" type="date" value="<?= $defaultCheckout ?>" min="<?= $defaultCheckin ?>" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:outline-none">
                         </div>
                     </div>
                     <div>
                         <label for="booking-guests" class="mb-1 block text-sm font-medium text-slate-700">Гостей</label>
-                        <select id="booking-guests" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-teal-500 focus:outline-none">
+                        <select id="booking-guests" name="guests" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-teal-500 focus:outline-none">
                             <?php for ($guestCount = 1; $guestCount <= 8; $guestCount++): ?>
                                 <option value="<?= $guestCount ?>" <?= $guestCount === $requestedGuests ? 'selected' : '' ?>><?= $guestCount ?> <?= $guestCount === 1 ? 'гость' : ($guestCount < 5 ? 'гостя' : 'гостей') ?></option>
                             <?php endfor; ?>
@@ -333,7 +346,7 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
                     <div>
                         <label for="booking-promo" class="mb-1 block text-sm font-medium text-slate-700">Промокод</label>
                         <div class="flex gap-2">
-                            <input id="booking-promo" type="text" maxlength="20" placeholder="Например: WELCOME10" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 font-mono text-sm uppercase focus:border-teal-500 focus:outline-none">
+                            <input id="booking-promo" name="promo" type="text" maxlength="20" placeholder="Например: WELCOME10" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 font-mono text-sm uppercase focus:border-teal-500 focus:outline-none">
                             <button type="button" id="promo-check" class="shrink-0 rounded-xl border border-teal-500 px-4 text-sm font-semibold text-teal-600 transition hover:bg-teal-50">Проверить</button>
                         </div>
                         <p id="promo-msg" class="mt-1 hidden text-xs font-medium text-emerald-600"></p>
@@ -357,8 +370,8 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
     <section class="mt-14">
         <h2 class="mb-6 text-2xl font-extrabold text-slate-900">Похожие отели</h2>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <?php foreach ($related as $hotel): ?>
-                <?php include __DIR__ . '/components/hotel-card.php'; ?>
+            <?php foreach ($related as $relatedHotel): ?>
+                <?php $hotel = $relatedHotel; include __DIR__ . '/components/hotel-card.php'; ?>
             <?php endforeach; ?>
         </div>
     </section>

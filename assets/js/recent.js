@@ -11,8 +11,9 @@
 
   function add(city) {
     if (!city) return;
-    let list = read().filter((x) => x.city !== city);
-    list.unshift({ city: city, ts: Date.now() });
+    const normalized = city.trim().toLowerCase().normalize('NFC');
+    let list = read().filter((x) => x.city.trim().toLowerCase().normalize('NFC') !== normalized);
+    list.unshift({ city: city.trim(), ts: Date.now() });
     list = list.slice(0, 5);
     localStorage.setItem(KEY, JSON.stringify(list));
     render();

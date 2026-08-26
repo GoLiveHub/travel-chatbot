@@ -6,10 +6,11 @@ require __DIR__ . '/config.php';
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     h_error('Метод не поддерживается', 405);
 }
-rate_limit('booking', 5, 60); // 5 бронирований в минуту
+rate_limit('booking', 5, 60);
 if (request_is_too_large()) {
     h_error('Слишком большой запрос', 413);
 }
+csrf_check();
 
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) {
@@ -31,6 +32,7 @@ if ($hotelId <= 0) {
 if ($name === '' || mb_strlen($name) > 80 || preg_match('/[\x00-\x1F\x7F]/u', $name)) {
     h_error('Укажите имя длиной до 80 символов');
 }
+$name = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 if ($phone === null) {
     h_error('Укажите корректный телефон: от 10 до 15 цифр');
 }
@@ -88,7 +90,7 @@ $discount = 0;
 $promoApplied = null;
 if ($promo !== '') {
     if (!isset($PROMOS[$promo])) {
-        h_error('Промокод "' . $promo . '" не найден. Доступны: ' . implode(', ', array_keys($PROMOS)));
+        h_error('Промокод не найден. Проверьте код и попробуйте снова.');
     }
     $promoApplied = $promo;
     $p = $PROMOS[$promo];
@@ -143,8 +145,7 @@ $response = [
     'nights' => $nights,
     'total' => $total,
     'message' => 'Бронирование принято! В демо-версии заявка сохранена в журнал.',
-    'access_token' => $accessToken,
-    'confirmation_url' => '/booking-confirm.php?ref=' . rawurlencode($ref) . '&token=' . rawurlencode($accessToken),
+    'confirmation_url' => '/booking-confirm.php?ref=' . rawurlencode($ref),
 ];
 if ($promoApplied) {
     $response['promo'] = $promoApplied;

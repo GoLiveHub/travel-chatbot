@@ -27,6 +27,7 @@
       const params = new URLSearchParams(new FormData(heroForm));
       try {
         const res = await fetch('/api/hotels.php');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         if (data.ok && q) {
           const ql = q.toLowerCase();
@@ -47,10 +48,11 @@
     const checkout = heroForm.querySelector('[name="checkout"]');
     if (checkin && checkout) checkin.addEventListener('change', () => {
       checkout.min = checkin.value;
-      if (checkout.value <= checkin.value) {
-        const next = new Date(checkin.value + 'T00:00:00');
-        next.setDate(next.getDate() + 1);
-        checkout.value = next.toISOString().slice(0, 10);
+      if (checkin.value && checkout.value && checkout.value <= checkin.value) {
+        const parts = checkin.value.split('-');
+        const next = new Date(+parts[0], +parts[1] - 1, +parts[2] + 1);
+        const p2 = (n) => String(n).padStart(2, '0');
+        checkout.value = next.getFullYear() + '-' + p2(next.getMonth() + 1) + '-' + p2(next.getDate());
       }
     });
   }

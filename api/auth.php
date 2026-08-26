@@ -3,21 +3,31 @@
 declare(strict_types=1);
 require __DIR__ . '/config.php';
 
-rate_limit('auth', 10, 60); // 10 попыток в минуту
+rate_limit('auth', 10, 60);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path = trim($_GET['action'] ?? '', '/');
 
-// CORS для фронтенда
-header('Access-Control-Allow-Origin: *');
+// CORS — credentials требует конкретный Origin, не *
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$base = app_base_url();
+if ($origin !== '' && preg_match('#^https?://[a-z0-9\-]+(\.[a-z0-9\-]+)*(:\d+)?$#i', $origin)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+} else {
+    header('Access-Control-Allow-Origin: ' . $base);
+}
 header('Access-Control-Allow-Credentials: true');
-if ($method === 'OPTIONS') { http_response_code(204); exit; }
+if ($method === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 auth_start();
 
 switch ($path) {
     case 'register':
         if ($method !== 'POST') h_error('Метод не поддерживается', 405);
+        csrf_check();
         $body = json_decode(file_get_contents('php://input'), true) ?: $_POST;
         $email = trim((string) ($body['email'] ?? ''));
         $password = (string) ($body['password'] ?? '');
@@ -28,13 +38,14 @@ switch ($path) {
         $user = users_create($email, $password, $name);
         if ($user === null) h_error('Пользователь с таким email уже существует');
         unset($user['password_hash']);
-        auth_start();
+        session_regenerate_id(true);
         $_SESSION['user'] = $user;
         h_json(['ok' => true, 'user' => $user]);
         break;
 
     case 'login':
         if ($method !== 'POST') h_error('Метод не поддерживается', 405);
+        csrf_check();
         $body = json_decode(file_get_contents('php://input'), true) ?: $_POST;
         $email = trim((string) ($body['email'] ?? ''));
         $password = (string) ($body['password'] ?? '');
@@ -56,7 +67,6 @@ switch ($path) {
         break;
 
     case 'google':
-        // Начало OAuth — редирект на Google
         $clientId = getenv('GOOGLE_CLIENT_ID') ?: '';
         $redirectUri = app_base_url() . '/api/auth.php?action=google-callback';
         if ($clientId === '') h_error('Google OAuth не настроен');
@@ -77,7 +87,6 @@ switch ($path) {
         if ($code === '' || $clientId === '' || $clientSecret === '') {
             h_error('Ошибка Google OAuth: отсутствуют параметры');
         }
-        // Обмен кода на токен
         $ch = curl_init('https://oauth2.googleapis.com/token');
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
@@ -86,23 +95,34 @@ switch ($path) {
                 'redirect_uri' => $redirectUri, 'grant_type' => 'authorization_code',
             ]),
             CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
         ]);
-        $tokenResp = json_decode(curl_exec($ch), true);
+        $resp = curl_exec($ch);
+        $curlErr = curl_error($ch);
         curl_close($ch);
-        if (empty($tokenResp['access_token'])) h_error('Не удалось получить токен Google');
-        // Получение профиля
+        if ($resp === false || $resp === '') {
+            error_log("Google OAuth token exchange failed: $curlErr");
+            h_error('Не удалось связаться с Google. Попробуйте позже.');
+        }
+        $tokenResp = json_decode($resp, true);
+        if (!is_array($tokenResp) || empty($tokenResp['access_token'])) {
+            error_log("Google OAuth token response: " . ($resp ?: 'empty'));
+            h_error('Не удалось получить токен Google');
+        }
         $ch = curl_init('https://www.googleapis.com/oauth2/v2/userinfo');
         curl_setopt_array($ch, [
             CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $tokenResp['access_token']],
             CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
         ]);
-        $profile = json_decode(curl_exec($ch), true);
+        $profResp = curl_exec($ch);
         curl_close($ch);
-        if (empty($profile['email'])) h_error('Не удалось получить данные профиля');
-        // Найти или создать пользователя
+        $profile = json_decode($profResp ?: '{}', true);
+        if (!is_array($profile) || empty($profile['email'])) h_error('Не удалось получить данные профиля');
         $email = mb_strtolower($profile['email']);
         $user = users_find_by_email($email);
         if ($user === null) {
+            $users = users_load();
             $user = [
                 'id' => bin2hex(random_bytes(16)),
                 'email' => $email,
@@ -110,13 +130,12 @@ switch ($path) {
                 'oauth_provider' => 'google',
                 'created_at' => date('c'),
             ];
-            $users = users_load();
             $users[] = $user;
             users_save($users);
         }
-        auth_start();
+        unset($user['password_hash']);
+        session_regenerate_id(true);
         $_SESSION['user'] = $user;
-        // Редирект на главную
         header('Location: /');
         exit;
 

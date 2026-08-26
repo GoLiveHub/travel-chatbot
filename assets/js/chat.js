@@ -56,7 +56,7 @@
   }
 
   function scrollToBottom() {
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight - messages.clientHeight;
   }
 
   function open() {
@@ -112,9 +112,18 @@
       const a = document.createElement('a');
       a.href = '/hotel.php?id=' + h.id;
       a.className = 'rounded-xl border border-slate-200 bg-white p-3 text-slate-700 shadow-sm transition hover:border-teal-400 hover:shadow';
-      a.innerHTML = '<div class="font-semibold">' + esc(h.name) + '</div>' +
-        '<div class="text-xs text-slate-500">' + esc(h.city) + ' · ' + h.stars + '★ · ' + (TYPE_LABELS[h.type] || h.type) + '</div>' +
-        '<div class="mt-1 text-sm font-bold text-teal-600">' + (typeof window !== 'undefined' && window.travelCurrency ? window.travelCurrency.format(h.price) : new Intl.NumberFormat('ru-RU').format(h.price) + ' ₽') + ' / ночь</div>';
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'font-semibold';
+      nameDiv.textContent = h.name;
+      a.appendChild(nameDiv);
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'text-xs text-slate-500';
+      metaDiv.textContent = h.city + ' · ' + h.stars + '\u2605 \u00B7 ' + (TYPE_LABELS[h.type] || h.type);
+      a.appendChild(metaDiv);
+      const priceDiv = document.createElement('div');
+      priceDiv.className = 'mt-1 text-sm font-bold text-teal-600';
+      priceDiv.textContent = (typeof window !== 'undefined' && window.travelCurrency ? window.travelCurrency.format(h.price) : new Intl.NumberFormat('ru-RU').format(h.price) + ' \u20BD') + ' / \u043D\u043E\u0447\u044C';
+      a.appendChild(priceDiv);
       wrap.appendChild(a);
     });
     const item = document.createElement('div');
@@ -148,14 +157,18 @@
     });
   }
 
-  function esc(s) {
-    const d = document.createElement('div');
-    d.textContent = s == null ? '' : String(s);
-    return d.innerHTML;
-  }
-
   function showTyping() {
-    addMsg('bot', '<span class="chat-typing-bubble flex"><span class="chat-typing"><i></i><i></i><i></i></span></span>', true);
+    const wrap = document.createElement('div');
+    wrap.className = 'flex justify-start';
+    const bubble = document.createElement('div');
+    bubble.className = 'max-w-[80%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 shadow-sm border border-slate-200 chat-typing-bubble';
+    const typing = document.createElement('span');
+    typing.className = 'chat-typing';
+    for (let i = 0; i < 3; i++) { const dot = document.createElement('i'); typing.appendChild(dot); }
+    bubble.appendChild(typing);
+    wrap.appendChild(bubble);
+    messages.appendChild(wrap);
+    scrollToBottom();
   }
   function removeTyping() {
     const all = messages.querySelectorAll('.chat-typing-bubble');
@@ -348,6 +361,7 @@
         body: JSON.stringify({ text: text.slice(0, 500), context: ctx }),
         signal: controller.signal,
       });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     } finally {
       clearTimeout(timeout);
@@ -406,10 +420,12 @@
             updateFlowChips();
           }
         } else {
+          removeTyping();
           addMsg('bot', 'Ой, что-то пошло не так. Напишите ещё раз или продолжим бронь.');
           updateFlowChips();
         }
       } catch (err) {
+        removeTyping();
         addMsg('bot', 'Ой, что-то пошло не так. Проверьте соединение.');
         updateFlowChips();
       }
@@ -557,12 +573,13 @@
       const m = range[3] ? MONTHS[range[3].toLowerCase()] : now.getMonth();
       const a = new Date(now.getFullYear(), m === undefined ? now.getMonth() : m, +range[1]);
       const b = new Date(now.getFullYear(), m === undefined ? now.getMonth() : m, +range[2]);
+      if (a.getDate() !== +range[1] || b.getDate() !== +range[2]) return null;
       if (m === undefined && b <= a) b.setMonth(b.getMonth() + 1);
       return build(a, b);
     }
     return null;
   }
-  function normYear(y) { y = +y; return y < 100 ? 2000 + y : y; }
+  function normYear(y) { y = +y; const c = Math.floor(new Date().getFullYear() / 100) * 100; return y < 100 ? c + y : y; }
   function build(a, b) {
     if (isNaN(a.getTime()) || isNaN(b.getTime())) return null;
     const today = new Date();
@@ -650,7 +667,6 @@
     ctx.profile = {
       ...ctx.profile,
       name: flow.name,
-      phone: flow.phone,
       guests: flow.guests,
       checkin: flow.checkin,
       checkout: flow.checkout,
@@ -658,7 +674,7 @@
     };
     saveCtx();
     flow.step = 'confirm';
-    addMsg('bot', 'Подтвердите бронирование:\n' +
+addMsg('bot', 'Подтвердите бронирование:\n' +
       (flow.hotelName || 'Отель ' + flow.hotelId) + '\n' +
       fmtHuman(flow.checkin) + ' – ' + fmtHuman(flow.checkout) + ' · ' + flow.nights + ' ' + pluralNights(flow.nights) + '\n' +
       'Гостей: ' + flow.guests + '\n' +
@@ -737,8 +753,11 @@
 
   toggleBtn.addEventListener('click', open);
   closeBtn.addEventListener('click', close);
+  widget.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !widget.classList.contains('hidden')) close(); });
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    send(input.value);
+    const text = input.value;
+    input.value = '';
+    send(text);
   });
 })();

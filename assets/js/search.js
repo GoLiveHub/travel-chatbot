@@ -35,13 +35,13 @@
 
   function state() {
     return {
-      min: parseInt(priceMin.value || '0', 10) || 0,
-      max: parseInt(priceMax.value || '100000', 10) || 100000,
-      rating: parseFloat(ratingSel.value) || 0,
-      stars: parseInt(starsSel.value || '0', 10) || 0,
-      sort: sortSel.value,
-      amenities: Array.from(amenityBoxes).filter((b) => b.checked).map((b) => b.value),
-      type: activeType ? activeType.dataset.value : 'all',
+      min: parseInt(priceMin?.value || '0', 10) || 0,
+      max: parseInt(priceMax?.value || '100000', 10) || 100000,
+      rating: parseFloat(ratingSel?.value) || 0,
+      stars: parseInt(starsSel?.value || '0', 10) || 0,
+      sort: sortSel?.value || 'rating',
+      amenities: Array.from(amenityBoxes || []).filter((b) => b.checked).map((b) => b.value),
+      type: activeType?.dataset?.value || 'all',
       city: normalizeCity(city),
     };
   }
@@ -87,7 +87,7 @@
       '<span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">' + esc(AMENITY_LABELS[a] || a) + '</span>'
     ).join('');
     return `
-    <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-xl" data-hotel-id="${h.id}">
+    <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-xl" data-hotel-id="${esc(String(h.id))}">
       <a href="${bookingHref(h.id)}" class="relative block aspect-[4/3] overflow-hidden bg-slate-100">
         <img src="${esc(img)}" alt="${esc(h.name)}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" onerror="this.src='/assets/img/hotel-1.jpg'">
         <span class="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-800 shadow">${'★'.repeat(h.stars)}</span>
@@ -100,10 +100,10 @@
             <p class="mt-0.5 text-sm text-slate-500">${esc(h.city)}, ${esc(h.country)}</p>
           </div>
           <div class="flex shrink-0 items-center gap-1">
-            <button class="fav-btn rounded-full p-2 ${fav} transition hover:text-rose-500" data-id="${h.id}" title="В избранное">
+            <button class="fav-btn rounded-full p-2 ${fav} transition hover:text-rose-500" data-id="${esc(String(h.id))}" title="В избранное">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
             </button>
-            <button class="cmp-btn rounded-full p-2 text-slate-300 transition hover:text-teal-600" data-id="${h.id}" data-name="${esc(h.name)}" title="Добавить к сравнению">
+            <button class="cmp-btn rounded-full p-2 text-slate-300 transition hover:text-teal-600" data-id="${esc(String(h.id))}" data-name="${esc(h.name)}" title="Добавить к сравнению">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
             </button>
           </div>
@@ -148,19 +148,17 @@
     const params = new URLSearchParams(location.search);
     const min = params.get('min');
     const max = params.get('max');
-    if (min && priceMin) priceMin.value = min;
-    if (max && priceMax) { priceMax.value = max; if (priceRange) priceRange.value = max; }
+    if (min && priceMin) priceMin.value = min; else if (priceMin) priceMin.value = '0';
+    if (max && priceMax) { priceMax.value = max; if (priceRange) priceRange.value = max; } else if (priceMax) { priceMax.value = '100000'; if (priceRange) priceRange.value = '100000'; }
     const rating = params.get('rating');
-    if (rating && ratingSel) ratingSel.value = rating;
+    if (rating && ratingSel) ratingSel.value = rating; else if (ratingSel) ratingSel.value = '0';
     const stars = params.get('stars');
-    if (stars && starsSel) starsSel.value = stars;
+    if (stars && starsSel) starsSel.value = stars; else if (starsSel) starsSel.value = '0';
     const sort = params.get('sort');
-    if (sort && sortSel) sortSel.value = sort;
+    if (sort && sortSel) sortSel.value = sort; else if (sortSel) sortSel.value = 'rating';
     const amenities = params.get('amenities');
-    if (amenities) {
-      const wanted = amenities.split(',').map((x) => x.trim()).filter(Boolean);
-      amenityBoxes.forEach((b) => { b.checked = wanted.includes(b.value); });
-    }
+    const wanted = amenities ? amenities.split(',').map((x) => x.trim()).filter(Boolean) : [];
+    amenityBoxes.forEach((b) => { b.checked = wanted.includes(b.value); });
     const t = params.get('type');
     if (t && activeType) {
       activeType.dataset.value = t;
@@ -168,15 +166,18 @@
         p.classList.remove('pill-active', 'border-teal-500', 'bg-teal-500', 'text-white');
         if (p.dataset.type === t) p.classList.add('pill-active', 'border-teal-500', 'bg-teal-500', 'text-white');
       });
+    } else if (activeType) {
+      activeType.dataset.value = 'all';
+      pills.forEach((p) => {
+        p.classList.remove('pill-active', 'border-teal-500', 'bg-teal-500', 'text-white');
+        if (p.dataset.type === 'all') p.classList.add('pill-active', 'border-teal-500', 'bg-teal-500', 'text-white');
+      });
     }
     const c = params.get('city');
-    if (c) {
-      city = c;
-      if (cityInput) cityInput.value = c;
-    }
-    if (params.get('checkin') && checkinInput) checkinInput.value = params.get('checkin');
-    if (params.get('checkout') && checkoutInput) checkoutInput.value = params.get('checkout');
-    if (params.get('guests') && guestsInput) guestsInput.value = params.get('guests');
+    if (c) { city = c; if (cityInput) cityInput.value = c; } else { city = ''; if (cityInput) cityInput.value = ''; }
+    if (params.get('checkin') && checkinInput) checkinInput.value = params.get('checkin'); else if (checkinInput) checkinInput.value = '';
+    if (params.get('checkout') && checkoutInput) checkoutInput.value = params.get('checkout'); else if (checkoutInput) checkoutInput.value = '';
+    if (params.get('guests') && guestsInput) guestsInput.value = params.get('guests'); else if (guestsInput) guestsInput.value = '';
     if (checkinInput && checkoutInput) checkoutInput.min = checkinInput.value;
   }
 
@@ -202,20 +203,22 @@
     if (window.travelCompare) travelCompare.syncButtons();
   }
 
+  function debounce(fn, ms) { let t; return function () { clearTimeout(t); t = setTimeout(() => fn.apply(this, arguments), ms); }; }
+
   function bindEvents() {
+    const debouncedRender = debounce(() => { render(); syncUrl(true); }, 250);
     if (priceRange) {
       priceRange.addEventListener('input', () => {
         priceMax.value = priceRange.value;
-        render();
-        syncUrl(false);
+        requestAnimationFrame(() => { render(); syncUrl(false); });
       });
     }
-    if (priceMax) priceMax.addEventListener('change', () => { if (priceRange) priceRange.value = priceMax.value; render(); syncUrl(true); });
-    if (priceMin) priceMin.addEventListener('change', () => { render(); syncUrl(true); });
-    if (ratingSel) ratingSel.addEventListener('change', () => { render(); syncUrl(true); });
-    if (starsSel) starsSel.addEventListener('change', () => { render(); syncUrl(true); });
-    if (sortSel) sortSel.addEventListener('change', () => { render(); syncUrl(true); });
-    amenityBoxes.forEach((b) => b.addEventListener('change', () => { render(); syncUrl(true); }));
+    if (priceMax) priceMax.addEventListener('change', debouncedRender);
+    if (priceMin) priceMin.addEventListener('change', debouncedRender);
+    if (ratingSel) ratingSel.addEventListener('change', debouncedRender);
+    if (starsSel) starsSel.addEventListener('change', debouncedRender);
+    if (sortSel) sortSel.addEventListener('change', debouncedRender);
+    amenityBoxes.forEach((b) => b.addEventListener('change', debouncedRender));
     pills.forEach((p) => p.addEventListener('click', () => {
       pills.forEach((x) => x.classList.remove('pill-active', 'border-teal-500', 'bg-teal-500', 'text-white'));
       p.classList.add('pill-active', 'border-teal-500', 'bg-teal-500', 'text-white');
@@ -267,10 +270,11 @@
     if (checkinInput) checkinInput.addEventListener('change', () => {
       if (checkoutInput) {
         checkoutInput.min = checkinInput.value;
-        if (checkoutInput.value <= checkinInput.value) {
-          const next = new Date(checkinInput.value + 'T00:00:00');
-          next.setDate(next.getDate() + 1);
-          checkoutInput.value = next.toISOString().slice(0, 10);
+        if (checkinInput.value && checkoutInput.value && checkoutInput.value <= checkinInput.value) {
+          const parts = checkinInput.value.split('-');
+          const next = new Date(+parts[0], +parts[1] - 1, +parts[2] + 1);
+          const p2 = (n) => String(n).padStart(2, '0');
+          checkoutInput.value = next.getFullYear() + '-' + p2(next.getMonth() + 1) + '-' + p2(next.getDate());
         }
       }
       syncUrl(true);

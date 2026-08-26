@@ -2,6 +2,9 @@
 // Страница подтверждения бронирования
 require __DIR__ . '/api/config.php';
 
+// Запрещаем Referer чтобы токен не утек в URL внешних сайтов
+header('Referrer-Policy: no-referrer');
+
 $ref = trim((string) ($_GET['ref'] ?? ''));
 $token = trim((string) ($_GET['token'] ?? ''));
 $entry = $ref !== '' && $token !== '' ? find_booking($ref, $token, null) : null;

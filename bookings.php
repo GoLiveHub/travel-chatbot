@@ -1,11 +1,15 @@
 <?php
 require __DIR__ . '/api/config.php';
 
+// Запрещаем Referer чтобы токены не утекали в URL внешних сайтов
+header('Referrer-Policy: no-referrer');
+
 $ref = mb_strtoupper(trim((string) ($_POST['ref'] ?? '')));
 $phone = trim((string) ($_POST['phone'] ?? ''));
 $entry = null;
 $searched = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 if ($searched && preg_match('/^TRV-[A-F0-9]{6,8}$/', $ref)) {
+    csrf_check();
     $entry = find_booking($ref, null, $phone);
 }
 ?>
@@ -32,6 +36,7 @@ if ($searched && preg_match('/^TRV-[A-F0-9]{6,8}$/', $ref)) {
     </div>
 
     <form method="post" class="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
         <div>
             <label for="booking-ref" class="mb-1 block text-sm font-semibold text-slate-700">Номер заявки</label>
             <input id="booking-ref" name="ref" value="<?= htmlspecialchars($ref) ?>" required maxlength="12" placeholder="TRV-12AB34CD" class="w-full rounded-xl border border-slate-300 px-4 py-3 font-mono uppercase focus:border-teal-500 focus:outline-none">

@@ -25,7 +25,8 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
     <meta property="og:title" content="Travel.ru — поиск и бронирование отелей">
     <meta property="og:description" content="Пляжи, горы и города — более 30 проверенных отелей. Поиск, сравнение и бронирование в несколько кликов.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="/assets/img/hero.jpg">
+    <meta property="og:image" content="https://travel.ru/assets/img/hero.jpg">
+    <link rel="canonical" href="https://travel.ru/">
         <script src="/assets/js/theme.js"></script>
 <link rel="stylesheet" href="/assets/css/tailwind.min.css">
     <link rel="stylesheet" href="/assets/css/styles.css">
@@ -88,9 +89,9 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
     <div class="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
         <h2 class="text-3xl font-extrabold text-slate-900">Популярные отели</h2>
         <div class="flex gap-2 rounded-full border border-slate-200 bg-white p-1">
-            <button class="home-tab rounded-full px-4 py-1.5 text-sm font-semibold tab-active bg-teal-500 text-white" data-tab="all">Популярное</button>
-            <button class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="beach">Пляж</button>
-            <button class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="mountain">Горы</button>
+            <button type="button" class="home-tab rounded-full px-4 py-1.5 text-sm font-semibold tab-active bg-teal-500 text-white" data-tab="all">Популярное</button>
+            <button type="button" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="beach">Пляж</button>
+            <button type="button" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="mountain">Горы</button>
         </div>
     </div>
 

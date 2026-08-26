@@ -1,10 +1,10 @@
 # Проект Travel.ru
 # Маршрутизация через прямые PHP-файлы (index.php, search.php, hotel.php)
-# Оптимизация PHP не требуется для демо
 
 ErrorDocument 404 /404.php
 ErrorDocument 403 /404.php
 Options -Indexes
+TraceEnable off
 
 RewriteEngine On
 RewriteCond %{REQUEST_METHOD} ^TRACE [NC]
@@ -13,11 +13,12 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
-    Header always set Referrer-Policy "same-origin"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set X-Frame-Options "DENY"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; frame-src https://www.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
-    <FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg)$">
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; frame-src https://www.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    <FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg|woff2?)$">
         Header set Cache-Control "public, max-age=86400"
     </FilesMatch>
 </IfModule>

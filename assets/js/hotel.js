@@ -54,6 +54,13 @@
     bookingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = bookingForm.querySelector('button[type="submit"]');
+      if (!btn) return;
+      const ci = document.getElementById('booking-checkin');
+      const co = document.getElementById('booking-checkout');
+      if (ci && co && ci.value && co.value && co.value <= ci.value) {
+        alert('Дата выезда должна быть позже даты заезда.');
+        return;
+      }
       const payload = {
         hotel_id: parseInt(hotelIdInput.value, 10) || 0,
         name: document.getElementById('booking-name').value.trim(),
@@ -133,7 +140,18 @@
         wrap.appendChild(mkArrow('next', next));
         wrap.addEventListener('mouseenter', stop);
         wrap.addEventListener('mouseleave', start);
+        let touchStartX = 0;
+        wrap.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; stop(); }, { passive: true });
+        wrap.addEventListener('touchend', (e) => {
+          const diff = e.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(diff) > 50) { if (diff < 0) next(); else prev(); }
+          start();
+        });
       }
+      // Pause gallery when tab is hidden
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop(); else start();
+      });
       start();
     } else if (main && items.length === 1) {
       items[0].addEventListener('click', () => { main.src = items[0].dataset.src; });
@@ -165,13 +183,15 @@
         }
       }
     }
+    function syncCheckoutMin() { if (checkout) checkout.min = checkin.value; }
     checkin.addEventListener('change', () => {
-      checkout.min = checkin.value;
+      syncCheckoutMin();
       if (checkout.value && new Date(checkout.value) <= new Date(checkin.value)) {
         checkout.value = '';
       }
       calc();
     });
+    checkin.addEventListener('input', syncCheckoutMin);
     checkout.addEventListener('change', calc);
     document.addEventListener('currency:changed', calc);
     calc();
@@ -193,15 +213,7 @@
         setTimeout(() => { shareBtn.textContent = 'Поделиться'; }, 2000);
       };
       try { await navigator.clipboard.writeText(url); done(); }
-      catch (err) {
-        const ta = document.createElement('textarea');
-        ta.value = url;
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); done(); }
-        catch (e2) { prompt('Скопируйте ссылку:', url); }
-        document.body.removeChild(ta);
-      }
+      catch (err) { prompt('Скопируйте ссылку:', url); }
     });
   }
 })();

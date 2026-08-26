@@ -12,5 +12,9 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-    healthCheckPath: /
+    disk:
+      name: travel-data
+      mountPath: /var/www/html/data
+      sizeGB: 1
+    healthCheckPath: /api/config.php
     autoDeploy: true

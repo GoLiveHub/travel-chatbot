@@ -3,3 +3,7 @@ Allow: /
 Disallow: /api/
 Disallow: /data/
 Disallow: /bookings.php
+Disallow: /booking-confirm.php
+Disallow: /favorites.php
+
+Sitemap: /sitemap.xml

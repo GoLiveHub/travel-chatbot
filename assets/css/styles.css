@@ -1,11 +1,17 @@
-/* Базовые стили поверх Tailwind CDN */
+/* Базовые стили поверх Tailwind */
 body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
 
-html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
-/* Тонкий скроллбар для чата */
-#chat-messages::-webkit-scrollbar { width: 6px; }
-#chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+/* Тонкий скроллбар */
+html { scrollbar-color: #94a3b8 #f1f5f1; scrollbar-width: thin; }
+html.dark { scrollbar-color: #475569 #1e293b; }
+#chat-messages::-webkit-scrollbar,
+.chat-widget ::-webkit-scrollbar { width: 6px; }
+#chat-messages::-webkit-scrollbar-thumb,
+.chat-widget ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
 /* Анимация появления карточек */
 @keyframes fadeInUp {
@@ -17,14 +23,32 @@ html { scroll-behavior: smooth; }
 /* Ленивые изображения */
 img[loading="lazy"] { background: #f1f5f9; }
 
-/* ================= Тёмная тема =================
-   Глобальное переопределение палитры Tailwind при html.dark.
-   Тексты перекрашиваются в светлые оттенки, поверхности — в тёмные,
-   чтобы не было «серого на тёмном». Специфичность выше, чем у утилит. */
+/* Accessibility: focus ring */
+:focus-visible { outline: 2px solid #14b8a6 !important; outline-offset: 2px; }
+
+/* Accessibility: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body { background: white !important; color: black !important; }
+  .no-print, nav, footer, #chat-widget, #chat-toggle, #compare-bar { display: none !important; }
+  a { color: black; text-decoration: underline; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 0.8em; }
+}
+
+/* ================= Dark theme ================= */
 html.dark { color-scheme: dark; }
 html.dark body { background-color: #0f172a; color: #e2e8f0; }
 
-/* Поверхности */
+/* Surfaces */
 html.dark .bg-white { background-color: #1e293b; }
 html.dark .bg-white\/90 { background-color: rgba(30, 41, 59, .9); }
 html.dark .bg-white\/95 { background-color: rgba(30, 41, 59, .95); }
@@ -35,10 +59,17 @@ html.dark .bg-slate-200 { background-color: #334155; }
 html.dark .bg-teal-50 { background-color: #134e4a; }
 html.dark .bg-emerald-50 { background-color: #064e3b; }
 html.dark .bg-emerald-50\/40 { background-color: rgba(6, 78, 59, .4); }
+html.dark .bg-rose-50 { background-color: rgba(136, 19, 55, .3); }
 html.dark .from-white { --tw-gradient-from: #1e293b; }
 html.dark .to-slate-50 { --tw-gradient-to: #0f172a; }
 
-/* Текст */
+/* Button backgrounds in dark mode */
+html.dark .bg-teal-500 { background-color: #0d9488; }
+html.dark .bg-blue-600 { background-color: #2563eb; }
+html.dark .bg-rose-500 { background-color: #e11d48; }
+html.dark .bg-amber-400 { background-color: #fbbf24; }
+
+/* Text */
 html.dark .text-slate-900 { color: #f1f5f9; }
 html.dark .text-slate-800 { color: #e2e8f0; }
 html.dark .text-slate-700 { color: #cbd5e1; }
@@ -51,7 +82,7 @@ html.dark .text-teal-600 { color: #2dd4bf; }
 html.dark .text-teal-700 { color: #5eead4; }
 html.dark .text-emerald-600 { color: #34d399; }
 
-/* Границы */
+/* Borders */
 html.dark .border-slate-100 { border-color: #1e293b; }
 html.dark .border-slate-200 { border-color: #334155; }
 html.dark .border-slate-300 { border-color: #475569; }
@@ -59,7 +90,7 @@ html.dark .border-teal-300 { border-color: #0f766e; }
 html.dark .border-emerald-100 { border-color: #064e3b; }
 html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1e293b; }
 
-/* Ховеры */
+/* Hovers */
 html.dark .hover\:bg-slate-50:hover { background-color: #1e293b; }
 html.dark .hover\:bg-slate-100:hover { background-color: #334155; }
 html.dark .hover\:bg-teal-50:hover { background-color: #134e4a; }
@@ -68,12 +99,17 @@ html.dark .hover\:text-slate-700:hover { color: #cbd5e1; }
 html.dark .hover\:text-slate-900:hover { color: #f1f5f9; }
 html.dark .hover\:text-teal-600:hover { color: #2dd4bf; }
 
-/* Плейсхолдеры */
+/* Placeholders */
 html.dark .placeholder\:text-slate-400::placeholder { color: #64748b; }
 
-/* Бейдж «Выгодно»: янтарный фон требует тёмного текста в любой теме */
+/* Badge override */
 html.dark .bg-amber-400.text-slate-900 { color: #0f172a; }
 
-/* Скроллбар чата и ленивые изображения */
+/* Missing dark text colors */
+html.dark .text-amber-400 { color: #fbbf24; }
+html.dark .text-emerald-500 { color: #10b981; }
+html.dark .text-red-600 { color: #ef4444; }
+
+/* Dark scrollbar */
 html.dark #chat-messages::-webkit-scrollbar-thumb { background: #475569; }
 html.dark img[loading="lazy"] { background: #1e293b; }
