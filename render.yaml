@@ -2,6 +2,7 @@ services:
   - type: web
     name: travel-chatbot
     runtime: docker
+    # plan: free -> starter ($7/mo) для продакшна: автоскейлинг, нет sleep, custom domain + SSL
     plan: free
     env: php
     dockerfilePath: Dockerfile
@@ -12,9 +13,11 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      - key: SENTRY_DSN
+        sync: false
     disk:
       name: travel-data
       mountPath: /var/www/html/data
       sizeGB: 1
-    healthCheckPath: /api/config.php
+    healthCheckPath: /api/health.php
     autoDeploy: true

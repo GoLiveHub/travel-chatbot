@@ -233,7 +233,7 @@
 
   async function pickHotel(id) {
     try {
-      const res = await fetch('/api/hotels.php');
+      const res = await fetch(window.API_BASE + '/hotels.php');
       const data = await res.json();
       const h = (data.hotels || []).find((x) => x.id === id);
       if (!h) throw new Error('no hotel');
@@ -355,7 +355,7 @@
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12000);
     try {
-      const res = await fetch('/api/chat.php', {
+      const res = await fetch(window.API_BASE + '/chat.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text.slice(0, 500), context: ctx }),
@@ -600,7 +600,7 @@
 
   async function submitBooking() {
     try {
-      const res = await fetch('/api/booking.php', {
+      const res = await fetch(window.API_BASE + '/booking.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -646,7 +646,7 @@
 
   async function resolveHotel(id) {
     try {
-      const res = await fetch('/api/hotels.php');
+      const res = await fetch(window.API_BASE + '/hotels.php');
       const data = await res.json();
       return (data.hotels || []).find((x) => x.id === id) || null;
     } catch (err) { return null; }

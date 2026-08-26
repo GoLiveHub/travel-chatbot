@@ -291,7 +291,7 @@
   async function init() {
     bindEvents();
     try {
-      const res = await fetch('/api/hotels.php');
+      const res = await fetch(window.API_BASE + '/hotels.php');
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Ошибка загрузки');
       allHotels = data.hotels;

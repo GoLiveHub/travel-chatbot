@@ -80,12 +80,8 @@ try {
 
 $total = $hotel['price'] * $nights;
 
-// Промокоды (демо)
-$PROMOS = [
-    'WELCOME10' => ['type' => 'percent', 'value' => 10],
-    'TRAVEL5'   => ['type' => 'fixed',   'value' => 500],
-    'SKI15'     => ['type' => 'percent', 'value' => 15],
-];
+// Промокоды — единый источник: data/promos.json
+$PROMOS = load_json('promos.json');
 $discount = 0;
 $promoApplied = null;
 if ($promo !== '') {

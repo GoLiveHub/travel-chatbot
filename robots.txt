@@ -5,5 +5,7 @@ Disallow: /data/
 Disallow: /bookings.php
 Disallow: /booking-confirm.php
 Disallow: /favorites.php
+Disallow: /login.php
+Disallow: /compare.php
 
 Sitemap: /sitemap.xml

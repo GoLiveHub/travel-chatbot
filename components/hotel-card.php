@@ -21,7 +21,7 @@ $amenityLabels = [
 ?>
 <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-xl" data-hotel-id="<?= (int) $hotel['id'] ?>">
     <a href="/hotel.php?id=<?= (int) $hotel['id'] ?>" class="relative block aspect-[4/3] overflow-hidden bg-slate-100">
-        <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($hotel['name']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" onerror="this.src='/assets/img/hotel-1.jpg'">
+        <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($hotel['name']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
         <span class="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-800 shadow">
             <?= str_repeat('★', $stars) ?>
         </span>

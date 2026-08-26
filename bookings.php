@@ -88,9 +88,10 @@ if ($searched && preg_match('/^TRV-[A-F0-9]{6,8}$/', $ref)) {
 </main>
 
 <?php include __DIR__ . '/components/footer.php'; ?>
-<script src="/assets/js/favs.js"></script>
-<script src="/assets/js/currency.js"></script>
-<script src="/assets/js/compare.js"></script>
-<script src="/assets/js/chat.js"></script>
+<script src="/assets/js/config.js"></script>
+<script defer src="/assets/js/favs.js"></script>
+<script defer src="/assets/js/currency.js"></script>
+<script defer src="/assets/js/compare.js"></script>
+<script defer src="/assets/js/chat.js"></script>
 </body>
 </html>

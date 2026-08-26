@@ -113,3 +113,11 @@ html.dark .text-red-600 { color: #ef4444; }
 /* Dark scrollbar */
 html.dark #chat-messages::-webkit-scrollbar-thumb { background: #475569; }
 html.dark img[loading="lazy"] { background: #1e293b; }
+
+/* Chat typing animation */
+@keyframes chat-dot { 0%, 80%, 100% { transform: scale(0.6); opacity: .4; } 40% { transform: scale(1); opacity: 1; } }
+.chat-typing { display: inline-flex; gap: 3px; align-items: center; }
+.chat-typing i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block; animation: chat-dot 1.2s infinite ease-in-out; }
+.chat-typing i:nth-child(2) { animation-delay: .2s; }
+.chat-typing i:nth-child(3) { animation-delay: .4s; }
+#chat-chips:empty { display: none; }

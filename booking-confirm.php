@@ -92,7 +92,7 @@ $cancelled = $entry && ($entry['status'] ?? 'confirmed') === 'cancelled';
                     <a href="/hotel.php?id=<?= (int) ($entry['hotel_id'] ?? 1) ?>" class="rounded-full border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">К отелю</a>
                     <a href="/bookings.php" class="rounded-full border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Мои бронирования</a>
                     <?php if (!$cancelled): ?>
-                        <button id="cancel-booking" type="button" class="rounded-full border border-rose-300 bg-white px-6 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50">Отменить бронь</button>
+                        <button id="cancel-booking" type="button" data-ref="<?= htmlspecialchars($ref) ?>" data-token="<?= htmlspecialchars($token) ?>" class="rounded-full border border-rose-300 bg-white px-6 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50">Отменить бронь</button>
                     <?php endif; ?>
                     <a href="/search.php" class="rounded-full bg-gradient-to-r from-blue-600 to-teal-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:shadow-lg">Найти ещё отель</a>
                 </div>
@@ -103,32 +103,11 @@ $cancelled = $entry && ($entry['status'] ?? 'confirmed') === 'cancelled';
 
 <?php include __DIR__ . '/components/footer.php'; ?>
 
-<script src="/assets/js/favs.js"></script>
-<script src="/assets/js/currency.js"></script>
-<script src="/assets/js/compare.js"></script>
-<script src="/assets/js/chat.js"></script>
-<?php if ($entry && !$cancelled): ?>
-<script>
-document.getElementById('cancel-booking')?.addEventListener('click', async function () {
-    if (!confirm('Точно отменить бронирование? Это действие нельзя отменить.')) return;
-    this.disabled = true;
-    this.textContent = 'Отменяем…';
-    try {
-        const response = await fetch('/api/cancel-booking.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ref: <?= json_encode($ref) ?>, token: <?= json_encode($token) ?>})
-        });
-        const data = await response.json();
-        if (!data.ok) throw new Error(data.error || 'Не удалось отменить бронь');
-        location.reload();
-    } catch (error) {
-        alert(error.message || 'Не удалось отменить бронь');
-        this.disabled = false;
-        this.textContent = 'Отменить бронь';
-    }
-});
-</script>
-<?php endif; ?>
+<script src="/assets/js/config.js"></script>
+<script defer src="/assets/js/favs.js"></script>
+<script defer src="/assets/js/currency.js"></script>
+<script defer src="/assets/js/compare.js"></script>
+<script defer src="/assets/js/chat.js"></script>
+<script src="/assets/js/cancel-booking.js" defer></script>
 </body>
 </html>

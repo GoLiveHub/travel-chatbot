@@ -1,11 +1,12 @@
 // Логика страницы отеля: галерея, бронирование, отзывы
 (function () {
-  // Промокоды (демо, зеркало api/booking.php)
-  const PROMOS = {
-    WELCOME10: { type: 'percent', value: 10 },
-    TRAVEL5: { type: 'fixed', value: 500 },
-    SKI15: { type: 'percent', value: 15 },
-  };
+  // Промокоды — загружаются из data/promos.json через API
+  let PROMOS = {};
+
+  fetch(window.API_BASE + '/promos.php')
+    .then(r => r.json())
+    .then(data => { PROMOS = data; })
+    .catch(() => {});
 
   const bookingForm = document.getElementById('booking-form');
   const hotelIdInput = document.getElementById('booking-hotel-id');
@@ -78,7 +79,7 @@
       btn.disabled = true;
       btn.textContent = 'Отправляем…';
       try {
-        const res = await fetch('/api/booking.php', {
+        const res = await fetch(window.API_BASE + '/booking.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

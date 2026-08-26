@@ -157,14 +157,14 @@ $hotelBadge = $hotel['badge'] ?? '';
             <!-- Галерея -->
             <div id="gallery">
                 <div class="relative overflow-hidden rounded-2xl">
-                    <img id="gallery-main" src="<?= htmlspecialchars($mainImg) ?>" alt="<?= htmlspecialchars($hotel['name']) ?>" class="aspect-[16/9] w-full object-cover" onerror="this.src='/assets/img/hotel-1.jpg'">
+                    <img id="gallery-main" src="<?= htmlspecialchars($mainImg) ?>" alt="<?= htmlspecialchars($hotel['name']) ?>" class="aspect-[16/9] w-full object-cover">
                     <span class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-slate-800 shadow"><?= str_repeat('★', $hotelStars) ?></span>
                 </div>
                 <?php if (count($extraImgs) > 1): ?>
                 <div class="mt-3 grid grid-cols-4 gap-3">
                     <?php foreach ($extraImgs as $i => $img): ?>
-                        <button type="button" data-src="/assets/<?= htmlspecialchars($img) ?>" class="overflow-hidden rounded-xl <?= $i === 0 ? 'ring-2 ring-teal-500' : '' ?>">
-                            <img src="/assets/<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($hotel['name'] . ' — фото ' . ($i + 1)) ?>" class="aspect-video w-full object-cover" loading="lazy" onerror="this.src='/assets/img/hotel-1.jpg'">
+                        <button type="button" data-src="/assets/<?= htmlspecialchars($img) ?>" aria-label="Фото <?= $i + 1 ?>: <?= htmlspecialchars($hotel['name']) ?>" class="overflow-hidden rounded-xl <?= $i === 0 ? 'ring-2 ring-teal-500' : '' ?>">
+                            <img src="/assets/<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($hotel['name'] . ' — фото ' . ($i + 1)) ?>" class="aspect-video w-full object-cover" loading="lazy">
                         </button>
                     <?php endforeach; ?>
                 </div>
@@ -191,7 +191,7 @@ $hotelBadge = $hotel['badge'] ?? '';
             </div>
 
             <div class="mt-4 flex flex-wrap gap-2">
-                <button id="share-btn" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Поделиться</button>
+<button id="share-btn" aria-label="Поделиться ссылкой на отель" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Поделиться</button>
                 <a href="https://wa.me/?text=<?= urlencode('Отель «' . $hotel['name'] . '» — ' . $hotel['city'] . '. Смотреть: ' . $baseUrl . '/hotel.php?id=' . $hotel['id']) ?>" target="_blank" rel="noopener" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">WhatsApp</a>
                 <a href="https://t.me/share/url?url=<?= urlencode($baseUrl . '/hotel.php?id=' . $hotel['id']) ?>&amp;text=<?= urlencode('Отель «' . $hotel['name'] . '» — ' . $hotel['city']) ?>" target="_blank" rel="noopener" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Telegram</a>
             </div>
@@ -245,11 +245,11 @@ $hotelBadge = $hotel['badge'] ?? '';
             <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-slate-900">Отзывы гостей</h2>
-                    <button id="review-toggle" class="rounded-full border border-teal-500 px-4 py-1.5 text-sm font-semibold text-teal-600 transition hover:bg-teal-50">Написать отзыв</button>
+                    <button id="review-toggle" aria-label="Открыть форму отзыва" class="rounded-full border border-teal-500 px-4 py-1.5 text-sm font-semibold text-teal-600 transition hover:bg-teal-50">Написать отзыв</button>
                 </div>
 
                 <div id="review-form-wrap" class="mt-4 hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <form id="review-form" class="space-y-3">
+                    <form id="review-form" aria-label="Форма отзыва" class="space-y-3">
                         <input type="hidden" id="review-hotel-id" value="<?= (int) $hotel['id'] ?>">
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
@@ -315,7 +315,7 @@ $hotelBadge = $hotel['badge'] ?? '';
                     <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">✓ Бесплатная отмена</span>
                 </div>
 
-                <form id="booking-form" action="/api/booking.php" method="post" class="mt-6 space-y-4">
+                <form id="booking-form" action="/api/booking.php" method="post" aria-label="Бронирование отеля" class="mt-6 space-y-4">
                     <input type="hidden" id="booking-hotel-id" name="hotel_id" value="<?= (int) $hotel['id'] ?>">
                     <div>
                         <label for="booking-name" class="mb-1 block text-sm font-medium text-slate-700">Имя</label>
@@ -382,11 +382,12 @@ $hotelBadge = $hotel['badge'] ?? '';
 
 <?php include __DIR__ . '/components/footer.php'; ?>
 
-<script src="/assets/js/favs.js"></script>
-<script src="/assets/js/currency.js"></script>
-<script src="/assets/js/compare.js"></script>
-<script src="/assets/js/chat.js"></script>
-<script src="/assets/js/hotel.js"></script>
-<script src="/assets/js/review.js"></script>
+<script src="/assets/js/config.js"></script>
+<script defer src="/assets/js/favs.js"></script>
+<script defer src="/assets/js/currency.js"></script>
+<script defer src="/assets/js/compare.js"></script>
+<script defer src="/assets/js/chat.js"></script>
+<script defer src="/assets/js/hotel.js"></script>
+<script defer src="/assets/js/review.js"></script>
 </body>
 </html>

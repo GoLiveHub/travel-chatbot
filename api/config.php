@@ -5,8 +5,15 @@ ob_start();
 
 // Сессия — ДО любых header() вызовов
 ini_set('session.gc_maxlifetime', 86400 * 7);
+ini_set('session.sid_length', '48');
+ini_set('session.sid_bits_per_character', '6');
+ini_set('session.use_strict_mode', '1');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Lax');
 if (session_status() === PHP_SESSION_NONE) {
-    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+        || !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
+        || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on');
     session_set_cookie_params([
         'lifetime' => 86400 * 7,
         'path' => '/',
@@ -68,17 +75,27 @@ function load_json(string $file): array
         echo json_encode(['ok' => false, 'error' => "Данные $file не найдены"]);
         exit;
     }
-    $raw = file_get_contents($path);
-    if ($raw === false) {
+    // Атомарное чтение через flock чтобы избежать race condition при параллельных запросах
+    $fp = fopen($path, 'r');
+    if ($fp === false) {
         http_response_code(500);
-        echo json_encode(['ok' => false, 'error' => "Не удалось прочитать $file"]);
+        echo json_encode(['ok' => false, 'error' => "Не удалось открыть $file"]);
         exit;
+    }
+    flock($fp, LOCK_SH);
+    $raw = file_get_contents($path);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    if ($raw === false || $raw === '') {
+        // Пустой файл — возвращаем пустой массив как fallback
+        error_log("load_json: $file is empty, returning []");
+        return [];
     }
     $data = json_decode($raw, true);
     if (!is_array($data) || json_last_error() !== JSON_ERROR_NONE) {
-        http_response_code(500);
-        echo json_encode(['ok' => false, 'error' => 'Ошибка парсинга JSON: ' . json_last_error_msg()]);
-        exit;
+        // Повреждённый JSON — логируем и возвращаем пустой массив вместо 500
+        error_log("load_json: $file parse error: " . json_last_error_msg() . ", returning []");
+        return [];
     }
     return $data;
 }
@@ -107,7 +124,7 @@ function h_error(string $msg, int $code = 400): void
     h_json(['ok' => false, 'error' => $msg, 'answer' => $msg], $code);
 }
 
-// --- CSRF защита ---
+// --- CSRF защита (ротация токена после каждой проверки) ---
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf_token'])) {
@@ -130,6 +147,8 @@ function csrf_check(): void
     if ($token === '' || !hash_equals(csrf_token(), $token)) {
         h_error('Неверная CSRF-проверка. Обновите страницу.', 403);
     }
+    // Ротация токена после успешной проверки
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Валидация координат города по имени
@@ -219,7 +238,7 @@ function rate_limit(string $key, int $maxRequests, int $windowSeconds): void
     $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
     $dir = DATA_DIR . '/rate_limits';
     if (!is_dir($dir)) {
-        @mkdir($dir, 0777, true);
+        @mkdir($dir, 0775, true);
         if (!is_dir($dir)) {
             error_log("rate_limit: не удалось создать директорию $dir");
             return;

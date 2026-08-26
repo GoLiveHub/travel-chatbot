@@ -29,7 +29,7 @@ $currentUser = auth_user();
             <a href="/bookings.php" class="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Мои бронирования" title="Мои бронирования"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></a>
             <?php if ($currentUser): ?>
                 <div class="relative" id="user-menu-wrap">
-                    <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-teal-500 text-sm font-bold text-white shadow-sm transition hover:shadow-md" title="<?= htmlspecialchars($currentUser['name']) ?>">
+                    <button id="user-avatar-btn" class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-teal-500 text-sm font-bold text-white shadow-sm transition hover:shadow-md" title="<?= htmlspecialchars($currentUser['name']) ?>">
                         <?= strtoupper(mb_substr($currentUser['name'], 0, 1)) ?>
                     </button>
                     <div id="user-dropdown" class="hidden absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
@@ -48,7 +48,7 @@ $currentUser = auth_user();
                             </a>
                         </div>
                         <div class="border-t border-slate-100 py-1">
-                            <button onclick="fetch('/api/auth.php?action=logout',{method:'POST'}).then(()=>location.reload())" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <button id="logout-btn" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                 Выйти
                             </button>
@@ -83,15 +83,4 @@ $currentUser = auth_user();
         </div>
     </div>
 </header>
-<script>
-(function(){
-    var btn=document.getElementById('user-menu-wrap');
-    if(!btn)return;
-    document.addEventListener('click',function(e){
-        var dd=document.getElementById('user-dropdown');
-        if(!dd)return;
-        if(btn.contains(e.target)){return;}
-        dd.classList.add('hidden');
-    });
-})();
-</script>
+<script defer src="/assets/js/user-menu.js"></script>

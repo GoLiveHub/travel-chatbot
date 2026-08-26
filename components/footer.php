@@ -66,11 +66,4 @@
         <button type="submit" aria-label="Отправить сообщение" title="Отправить" class="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-r from-blue-600 to-teal-500 text-white transition hover:shadow"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2L15 22 11 13 2 9z"></path></svg></button>
     </form>
 </div>
-<style>
-    @keyframes chat-dot { 0%, 80%, 100% { transform: scale(0.6); opacity: .4; } 40% { transform: scale(1); opacity: 1; } }
-    .chat-typing { display: inline-flex; gap: 3px; align-items: center; }
-    .chat-typing i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block; animation: chat-dot 1.2s infinite ease-in-out; }
-    .chat-typing i:nth-child(2) { animation-delay: .2s; }
-    .chat-typing i:nth-child(3) { animation-delay: .4s; }
-    #chat-chips:empty { display: none; }
-</style>
+<script src="/assets/js/sentry.js" defer></script>

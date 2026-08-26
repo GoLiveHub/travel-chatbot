@@ -26,7 +26,7 @@
       const q = input ? input.value.trim() : '';
       const params = new URLSearchParams(new FormData(heroForm));
       try {
-        const res = await fetch('/api/hotels.php');
+        const res = await fetch(window.API_BASE + '/hotels.php');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         if (data.ok && q) {

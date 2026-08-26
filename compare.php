@@ -81,7 +81,7 @@ $typeLabels = ['beach' => 'Пляжный', 'mountain' => 'Горнолыжны�
                             <?php $img = isset($h['images'][0]) ? '/assets/' . $h['images'][0] : '/assets/img/hotel-1.jpg'; ?>
                             <td class="px-4 py-3">
                                 <a href="/hotel.php?id=<?= (int) $h['id'] ?>">
-                                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($h['name']) ?>" class="aspect-[4/3] w-40 rounded-xl object-cover" loading="lazy" onerror="this.src='/assets/img/hotel-1.jpg'">
+                                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($h['name']) ?>" class="aspect-[4/3] w-40 rounded-xl object-cover" loading="lazy">
                                 </a>
                             </td>
                         <?php endforeach; ?>

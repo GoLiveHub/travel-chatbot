@@ -16,13 +16,22 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L]
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set X-Frame-Options "DENY"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; frame-src https://www.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self'; script-src 'self'; frame-src https://www.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+
     <FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg|woff2?)$">
-        Header set Cache-Control "public, max-age=86400"
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    <FilesMatch "\.(html|htm|php)$">
+        Header set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
 </IfModule>
 
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css application/javascript application/json image/svg+xml
 </IfModule>

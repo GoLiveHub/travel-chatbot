@@ -38,7 +38,7 @@
     btn.disabled = true;
     btn.textContent = 'Отправляем…';
     try {
-      const res = await fetch('/api/review.php', {
+      const res = await fetch(window.API_BASE + '/review.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

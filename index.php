@@ -26,7 +26,22 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
     <meta property="og:description" content="Пляжи, горы и города — более 30 проверенных отелей. Поиск, сравнение и бронирование в несколько кликов.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://travel.ru/assets/img/hero.jpg">
+    <meta property="og:url" content="https://travel.ru/">
     <link rel="canonical" href="https://travel.ru/">
+    <link rel="alternate" hreflang="ru" href="https://travel.ru/">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Travel.ru",
+      "url": "https://travel.ru/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://travel.ru/search.php?city={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
         <script src="/assets/js/theme.js"></script>
 <link rel="stylesheet" href="/assets/css/tailwind.min.css">
     <link rel="stylesheet" href="/assets/css/styles.css">
@@ -88,10 +103,10 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
     <div class="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
         <h2 class="text-3xl font-extrabold text-slate-900">Популярные отели</h2>
-        <div class="flex gap-2 rounded-full border border-slate-200 bg-white p-1">
-            <button type="button" class="home-tab rounded-full px-4 py-1.5 text-sm font-semibold tab-active bg-teal-500 text-white" data-tab="all">Популярное</button>
-            <button type="button" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="beach">Пляж</button>
-            <button type="button" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="mountain">Горы</button>
+        <div class="flex gap-2 rounded-full border border-slate-200 bg-white p-1" role="tablist" aria-label="Категории отелей">
+            <button type="button" role="tab" aria-selected="true" aria-controls="pane-all" class="home-tab rounded-full px-4 py-1.5 text-sm font-semibold tab-active bg-teal-500 text-white" data-tab="all">Популярное</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="pane-beach" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="beach">Пляж</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="pane-mountain" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="mountain">Горы</button>
         </div>
     </div>
 
@@ -119,7 +134,7 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
         <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <?php foreach ($cities as $i => $c): ?>
                 <a href="/search.php?city=<?= urlencode($c['name']) ?>" class="group relative overflow-hidden rounded-2xl aspect-[3/4]">
-                    <img src="/assets/<?= htmlspecialchars($c['image']) ?>" alt="<?= htmlspecialchars($c['name']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" onerror="this.style.opacity='0.6'">
+                    <img src="/assets/<?= htmlspecialchars($c['image']) ?>" alt="<?= htmlspecialchars($c['name']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div class="absolute bottom-3 left-3 right-3 text-white">
                         <div class="font-bold"><?= htmlspecialchars($c['name']) ?></div>
@@ -190,10 +205,11 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 
 <?php include __DIR__ . '/components/footer.php'; ?>
 
-<script src="/assets/js/favs.js"></script>
-<script src="/assets/js/currency.js"></script>
-<script src="/assets/js/compare.js"></script>
-<script src="/assets/js/chat.js"></script>
-<script src="/assets/js/main.js"></script>
+<script src="/assets/js/config.js"></script>
+<script defer src="/assets/js/favs.js"></script>
+<script defer src="/assets/js/currency.js"></script>
+<script defer src="/assets/js/compare.js"></script>
+<script defer src="/assets/js/chat.js"></script>
+<script defer src="/assets/js/main.js"></script>
 </body>
 </html>

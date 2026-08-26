@@ -1,0 +1,20 @@
+{
+  "name": "travel-ru",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Travel.ru — booking site build pipeline",
+  "scripts": {
+    "build:js": "esbuild assets/js/*.js --bundle --minify --outdir=dist/js --target=es2020 --sourcemap",
+    "build:css": "postcss assets/css/styles.css -o dist/css/styles.min.css --no-map",
+    "build": "npm run build:js && npm run build:css",
+    "watch": "concurrently \"esbuild assets/js/*.js --bundle --watch --outdir=dist/js --target=es2020 --sourcemap\" \"postcss assets/css/styles.css -o dist/css/styles.min.css --watch --no-map\""
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "postcss": "^8.4.38",
+    "postcss-cli": "^11.0.0",
+    "cssnano": "^6.1.0",
+    "@csstools/postcss-safe-authorization": "^1.0.0",
+    "concurrently": "^8.2.0"
+  }
+}

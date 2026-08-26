@@ -35,7 +35,7 @@ $guests = max(1, min(8, (int) ($_GET['guests'] ?? 2)));
         <div class="lg:sticky lg:top-20 lg:self-start"><?php include __DIR__ . '/components/filters.php'; ?></div>
 
         <div>
-            <form id="search-city-form" class="mb-6" autocomplete="off">
+            <form id="search-city-form" class="mb-6" autocomplete="off" aria-label="Поиск отелей">
                 <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_1fr_1fr_.65fr_auto]">
                     <div class="relative sm:col-span-2 xl:col-span-1">
                         <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></span>
@@ -80,11 +80,12 @@ $guests = max(1, min(8, (int) ($_GET['guests'] ?? 2)));
 
 <?php include __DIR__ . '/components/footer.php'; ?>
 
-<script src="/assets/js/favs.js"></script>
-<script src="/assets/js/currency.js"></script>
-<script src="/assets/js/compare.js"></script>
-<script src="/assets/js/chat.js"></script>
-<script src="/assets/js/recent.js"></script>
-<script src="/assets/js/search.js"></script>
+<script src="/assets/js/config.js"></script>
+<script defer src="/assets/js/favs.js"></script>
+<script defer src="/assets/js/currency.js"></script>
+<script defer src="/assets/js/compare.js"></script>
+<script defer src="/assets/js/chat.js"></script>
+<script defer src="/assets/js/recent.js"></script>
+<script defer src="/assets/js/search.js"></script>
 </body>
 </html>

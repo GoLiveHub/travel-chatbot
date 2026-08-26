@@ -8,6 +8,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
 }
 if (request_is_too_large()) h_error('Слишком большой запрос', 413);
 csrf_check();
+rate_limit('review', 5, 3600);
 
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) {
