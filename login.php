@@ -16,9 +16,9 @@ if (auth_user()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход и регистрация — Travel.ru</title>
     <meta name="description" content="Войдите или создайте аккаунт Travel.ru, чтобы бронировать отели и сохранять избранное.">
-    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/theme.js?v=20260901-c"></script>
     <link rel="stylesheet" href="/assets/css/tailwind.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20260901-c">
     <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
     <style>
         .auth-input {
@@ -91,6 +91,7 @@ if (auth_user()) {
 
         <!-- Форма входа -->
         <form id="form-login" class="space-y-4" novalidate>
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
             <input type="email" name="email" required autocomplete="email" placeholder="Email"
                    aria-label="Email"
                    class="auth-input w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200">
@@ -110,6 +111,7 @@ if (auth_user()) {
 
         <!-- Форма регистрации (скрыта по умолчанию) -->
         <form id="form-register" class="hidden space-y-4" novalidate>
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
             <input type="text" name="name" required autocomplete="name" placeholder="Имя"
                    aria-label="Имя"
                    class="auth-input w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200">
@@ -140,6 +142,7 @@ if (auth_user()) {
 
 <?php include __DIR__ . '/components/footer.php'; ?>
 
+<script src="/assets/js/config.js"></script>
 <script src="/assets/js/favs.js" defer></script>
 <script src="/assets/js/currency.js" defer></script>
 <script src="/assets/js/compare.js" defer></script>

@@ -56,4 +56,33 @@
       }
     });
   }
+
+  // Счётчики статистики: плавный count-up при появлении в окне
+  const statVals = document.querySelectorAll('.stat-val');
+  if (statVals.length) {
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fmt = (n) => { const s = String(Math.round(n)); return s.length > 3 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : s; };
+    const run = (el) => {
+      const target = parseInt(el.dataset.count, 10) || 0;
+      const suf = el.dataset.suffix || '';
+      if (reduced) { el.textContent = fmt(target) + suf; return; }
+      const dur = 900;
+      const t0 = performance.now();
+      const tick = (t) => {
+        const p = Math.min((t - t0) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * eased) + suf;
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    if (reduced || !('IntersectionObserver' in window)) {
+      statVals.forEach(run);
+    } else {
+      const stio = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { run(e.target); stio.unobserve(e.target); } });
+      }, { threshold: 0.4 });
+      statVals.forEach((el) => stio.observe(el));
+    }
+  }
 })();

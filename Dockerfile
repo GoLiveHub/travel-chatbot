@@ -4,7 +4,7 @@ RUN a2enmod rewrite
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
-    && docker-php-ext-install zip \
+    && docker-php-ext-install zip mbstring \
     && rm -rf /var/lib/apt/lists/*
 
 # Composer for PHP-ML
@@ -12,7 +12,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Сначала зависимости — для кэширования слоёв
 COPY composer.json composer.lock* /var/www/html/
-RUN composer install --no-dev --optimize-autoloader --no-scripts 2>/dev/null || true
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 COPY . /var/www/html/
 

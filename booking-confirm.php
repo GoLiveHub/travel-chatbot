@@ -7,7 +7,18 @@ header('Referrer-Policy: no-referrer');
 
 $ref = trim((string) ($_GET['ref'] ?? ''));
 $token = trim((string) ($_GET['token'] ?? ''));
-$entry = $ref !== '' && $token !== '' ? find_booking($ref, $token, null) : null;
+
+// Попытка найти бронь: сначала по токену, потом по телефону из сессии
+$entry = null;
+if ($ref !== '' && $token !== '') {
+    $entry = find_booking($ref, $token, null);
+} elseif ($ref !== '' && !empty($_SESSION['user'])) {
+    // Фолбэк: ищем по телефону зарегистрированного пользователя
+    $userPhone = $_SESSION['user']['phone'] ?? null;
+    if ($userPhone !== null) {
+        $entry = find_booking($ref, null, $userPhone);
+    }
+}
 $cancelled = $entry && ($entry['status'] ?? 'confirmed') === 'cancelled';
 ?>
 <!DOCTYPE html>
@@ -17,10 +28,11 @@ $cancelled = $entry && ($entry['status'] ?? 'confirmed') === 'cancelled';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $entry ? 'Бронирование ' . htmlspecialchars($ref) : 'Заявка не найдена' ?> — Travel.ru</title>
     <meta name="description" content="Подтверждение бронирования отеля.">
-        <script src="/assets/js/theme.js"></script>
+        <script src="/assets/js/theme.js?v=20260901-c"></script>
 <link rel="stylesheet" href="/assets/css/tailwind.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20260901-c">
     <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+    <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token()) ?>">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
 

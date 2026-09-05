@@ -76,6 +76,31 @@
     toggleBtn.classList.remove('hidden');
   }
 
+  // Санитизация для HTML-контента (защита от XSS при isHtml=addMsg):
+  // вычищаем <script>, обработчики on*, javascript: и прочие опасные атрибуты/теги.
+  function sanitizeHtml(html) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = String(html);
+    const dangerous = /^(script|iframe|object|embed|style|link|meta|base|form|svg|math|textarea|template)$/i;
+    const walk = (node) => {
+      if (node.nodeType === 1) {
+        const tag = node.tagName;
+        if (dangerous.test(tag)) { node.remove(); return; }
+        for (const attr of Array.from(node.attributes)) {
+          const n = attr.name.toLowerCase();
+          const v = attr.value.replace(/\s+/g, '').toLowerCase();
+          if (n.startsWith('on') || n === 'srcdoc' || v.startsWith('javascript:') || v.startsWith('data:text/html')
+            || (n === 'style' && /(javascript:|expression\s*\(|-moz-binding|@import|behavior:)/.test(v))) {
+            node.removeAttribute(attr.name);
+          }
+        }
+      }
+      for (const child of Array.from(node.childNodes)) walk(child);
+    };
+    walk(tpl.content);
+    return tpl.innerHTML;
+  }
+
   function addMsg(role, text, isHtml) {
     const wrap = document.createElement('div');
     wrap.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start');
@@ -84,7 +109,7 @@
       (role === 'user'
         ? 'rounded-br-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white'
         : 'rounded-bl-sm bg-white text-slate-700 shadow-sm border border-slate-200');
-    if (isHtml) bubble.innerHTML = text;
+    if (isHtml) bubble.innerHTML = sanitizeHtml(text);
     else bubble.textContent = text;
     wrap.appendChild(bubble);
     messages.appendChild(wrap);
@@ -750,6 +775,339 @@ addMsg('bot', 'Подтвердите бронирование:\n' +
     busy = true;
     doSend(text).finally(() => { busy = false; });
   }
+
+  // ---------- Three-layer ensemble: Regex → ML → LLM (all always run) ----------
+  // Layer 1: Client-side regex — extracts entities instantly (no server)
+  const LOCAL_REGEX = [
+    { rx: /^(?:привет|здравствуй|добрый (?:день|вечер|утро)|хай|хелло|алё|алло|йо|салют|даров|здаров|приветик|ку|кхе|hello|hi|hey|hola|yo)/i,
+      intent: 'greeting', answer: 'Привет! 👋 Готов помочь с отелями — подбор, сравнение, бронь. Куда хотите поехать?' },
+    { rx: /^(?:пока|до свидания|до встречи|прощай|бай|bye|goodbye)/i,
+      intent: 'farewell', answer: 'До встречи! Буду рад помочь снова — заходите когда угодно! 👋' },
+    { rx: /^(?:спасибо|благодар|сенкс|thanks|thank you)/i,
+      intent: 'thanks', answer: 'Пожалуйста! 😊 Рад помочь. Если нужен ещё отель — просто напишите!' },
+    { rx: /^(?:помощь|помоги|что (?:ты )?умеешь|что можешь|help)/i,
+      intent: 'help', answer: 'Я умею: искать отели по городу/цене/удобствам, бронировать, отменять бронь, отвечать на вопросы про отели. Просто напишите, что нужно!' },
+    { rx: /^(?:анекдот|шутка|рассмеши|смешн|joke|юмор)/i,
+      intent: 'joke', answer: '— Почему программист любит отели? — Потому что там бесплатный Wi-Fi и минибар! 😄' },
+    { rx: /^(?:скольк\w* (?:отел|город|направлен|всего)|каталог)/i,
+      intent: 'count', answer: 'В каталоге уже 42 отеля в 20 городах мира 🌍 Скажите «отели в Токио» или «лучшие отели» — покажу варианты!' },
+  ];
+
+  // Regex entity extraction — structured parse of user text
+  function regexExtract(text) {
+    var t = text.trim();
+    var entities = { city: null, hotel: null, price_min: null, price_max: null, amenities: [], stars: null, type: null, guests: null, checkin: null, checkout: null };
+
+    // Stop words — filter noise before parsing
+    var STOP_WORDS = /^(\u0430|\u043D\u043E|\u0438\u043B\u0438|\u0432\u043E\u0442|\u043D\u0443|\u0434\u0430\u0432\u0430\u0439|\u0434\u0430|\u0442\u043E|\u044D\u0442\u043E|\u043A\u0430\u043A|\u0447\u0442\u043E|\u0433\u0434\u0435|\u043A\u043E\u0433\u0434\u0430|\u0447\u0435\u043C|\u043A\u043E\u0442\u043E\u0440|\u043A\u0430\u043A\u043E\u0439|\u0442\u0430\u043A\u043E\u0439|\u043E\u0447\u0435\u043D\u044C|\u043F\u0440\u043E\u0441\u0442\u043E|\u0437\u043D\u0430\u0447\u0438\u0442|\u043E\u043A|\u043B\u0430\u0434\u043D\u043E|\u0430\u0433\u0430|\u043D\u0435\u0442|\u043D\u0435\u0430|\u0445\u043C|\u043D\u0443-?\u0432\u043E\u0442|\u0434\u0430\u0432\u0430\u0439)\s*/i;
+    t = t.replace(STOP_WORDS, '').trim();
+
+    // City aliases
+    var CITY_ALIASES = {
+      '\u043C\u0441\u043A': '\u041C\u043E\u0441\u043A\u0432\u0430',
+      '\u043F\u0438\u0442\u0435\u0440': '\u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433',
+      '\u0441\u043F\u0431': '\u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433',
+      '\u043C\u043E\u0441\u043A\u0432': '\u041C\u043E\u0441\u043A\u0432\u0430',
+      '\u043C\u043E\u0441\u043A\u0432\u0443': '\u041C\u043E\u0441\u043A\u0432\u0430',
+      '\u043F\u0435\u0442\u0435\u0440': '\u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433',
+      '\u043F\u0435\u0442\u0435\u0440\u0430': '\u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433',
+      '\u043F\u0435\u0442\u0435\u0440\u0435': '\u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433',
+      '\u043F\u0435\u0442\u0435\u0440\u0443': '\u0421\u0430\u043D\u043A\u0442-\u041F\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433',
+      '\u0441\u043E\u0447\u0438': '\u0421\u043E\u0447\u0438',
+    };
+    // City via "в + слово" pattern
+    var cityMatch = t.match(/\u0432\s+([\u0410-\u042F\u0430-\u044F\u0451\u0401]+(?:\s+[\u0410-\u042F\u0430-\u044F\u0451\u0401]+)*)/);
+    if (cityMatch) {
+      var raw = cityMatch[1].toLowerCase();
+      entities.city = CITY_ALIASES[raw] || cityMatch[1];
+    }
+    // City via standalone alias (no "в")
+    if (!entities.city) {
+      var lower = t.toLowerCase();
+      var aliasKeys = Object.keys(CITY_ALIASES);
+      for (var a = 0; a < aliasKeys.length; a++) {
+        if (lower === aliasKeys[a] || lower.indexOf(aliasKeys[a]) !== -1) {
+          entities.city = CITY_ALIASES[aliasKeys[a]];
+          break;
+        }
+      }
+    }
+    // Price: handles "до 120 000", "до 120 тысяч", "120 тыс", "10000"
+    var priceWords = { '\u0442\u044B\u0441\u044F\u0447': 1000, '\u0442\u044B\u0441': 1000, '\u0442\u044B\u0441\u044F\u0447\u0430': 1000, '\u043C\u0438\u043B\u043B\u0438\u043E\u043D': 1000000, '\u043C\u043B\u043D': 1000000 };
+    var priceKw = t.match(/(?:до|от)?\s*(\d[\d\s]*)\s*(\u0442\u044B\u0441[\u044F\u0447]*|\u0442\u044B\u0441|\u043C\u043B\u043D|\u043C\u0438\u043B\u043B\u0438\u043E\u043D)/i);
+    if (priceKw) {
+      var num = parseInt(priceKw[1].replace(/\s/g, ''), 10);
+      var mult = priceWords[priceKw[2].toLowerCase()] || 1;
+      var isMax = /до/i.test(t);
+      var isMin = /от/i.test(t);
+      if (isMax) entities.price_max = num * mult;
+      else if (isMin) entities.price_min = num * mult;
+      else entities.price_max = num * mult;
+    } else {
+      var priceMatch = t.match(/(?:до)\s+(\d[\d\s]*\d)\s*(?:\u20BD|\u0440\u0443\u0431|\u0440\u0443\u0431\u043B\u0435\u0439)?/i);
+      if (priceMatch) entities.price_max = parseInt(priceMatch[1].replace(/\s/g, ''), 10);
+      var priceFrom = t.match(/(?:от)\s+(\d[\d\s]*\d)\s*(?:\u20BD|\u0440\u0443\u0431)?/i);
+      if (priceFrom) entities.price_min = parseInt(priceFrom[1].replace(/\s/g, ''), 10);
+    }
+    // Amenities
+    if (/бассейн|пул|pool/i.test(t)) entities.amenities.push('pool');
+    if (/завтрак|breakfast/i.test(t)) entities.amenities.push('breakfast');
+    if (/парковк|паркинг|parking/i.test(t)) entities.amenities.push('parking');
+    if (/спа|sпа|саун|хаммам|джакузи/i.test(t)) entities.amenities.push('spa');
+    if (/трансфер|шаттл|transfer/i.test(t)) entities.amenities.push('transfer');
+    if (/wi-?fi|wifi|интернет|internet/i.test(t)) entities.amenities.push('wifi');
+    if (/мор[еяю]|пляж|beach/i.test(t)) entities.amenities.push('beach');
+    if (/фитнес|тренаж|спортзал|gym/i.test(t)) entities.amenities.push('gym');
+    if (/кух[н]\w*/i.test(t)) entities.amenities.push('kitchen');
+    if (/мини-?бар|minibar/i.test(t)) entities.amenities.push('minibar');
+    if (/ресторан|restaurant/i.test(t)) entities.amenities.push('restaurant');
+    if (/кондиционер|кондиц|ac/i.test(t)) entities.amenities.push('ac');
+    if (/балкон|террас|balcony/i.test(t)) entities.amenities.push('balcony');
+    if (/вс[её] включено|all-?inclusive/i.test(t)) entities.amenities.push('all-inclusive');
+    if (/детск\w* клуб|kids club|kid-club/i.test(t)) entities.amenities.push('kid-club');
+    if (/лифт|elevator/i.test(t)) entities.amenities.push('elevator');
+    if (/стирал|laundry/i.test(t)) entities.amenities.push('laundry');
+    // Stars
+    var starMatch = t.match(/(\d)\s*(?:звёзд|звезд|★)/i);
+    if (starMatch) entities.stars = parseInt(starMatch[1], 10);
+
+    // Guests
+    if (/вдвоём|на двоих|2 человека|2 гостя|2 гостей|двое/i.test(t)) entities.guests = 2;
+    else if (/втроём|на троих|3 человека|3 гостя|трое/i.test(t)) entities.guests = 3;
+    else if (/вчетвером|на четверых|4 человек|4 гостя|четверо/i.test(t)) entities.guests = 4;
+    else if (/впятером|на пятерых|5 человек|пятеро/i.test(t)) entities.guests = 5;
+    else {
+      var guestNum = t.match(/(?:на|для|нас|всего)\s+(\d{1,2})\s+(?:человек|гост[яе]й|гостя|гость|персон)/i) ||
+                     t.match(/(?:на|для|нас|всего)\s+(\d{1,2})\s*ч/i);
+      if (guestNum) entities.guests = parseInt(guestNum[1], 10);
+    }
+
+    // Dates: "с 10 по 15 августа", "двенадцатого января", "20-23 августа"
+    var months = { 'январ': 1, 'феврал': 2, 'март': 3, 'апрел': 4, 'мая': 5, 'май': 5, 'июн': 6, 'июл': 7, 'август': 8, 'сентябр': 9, 'октябр': 10, 'ноябр': 11, 'декабр': 12 };
+    var mKey = /(январ|феврал|март|апрел|мая|май|июн|июл|август|сентябр|октябр|ноябр|декабр)/i;
+    var mo = t.match(mKey);
+    if (mo) {
+      var monthNo = months[mo[1].toLowerCase()];
+      var thisYear = new Date().getFullYear();
+      // "с {d1} по {d2} месяц" or "{d1}-{d2}"
+      var range = t.match(/(?:с\s*)?(\d{1,2})\s*(?:по|до|-|\.\.)\s*(\d{1,2})\s*[а-яё]*\s*[а-яё]*/i);
+      var single = t.match(/с\s+(\d{1,2})(?:-го)?\s*/i);
+      if (range && monthNo) {
+        var d1 = parseInt(range[1], 10), d2 = parseInt(range[2], 10);
+        entities.checkin = thisYear + '-' + String(monthNo).padStart(2, '0') + '-' + String(d1).padStart(2, '0');
+        entities.checkout = thisYear + '-' + String(monthNo).padStart(2, '0') + '-' + String(d2).padStart(2, '0');
+      } else if (single && monthNo) {
+        var d = parseInt(single[1], 10);
+        entities.checkin = thisYear + '-' + String(monthNo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      }
+    }
+    // Type
+    if (/пляжн|у\s+моря|на\s+пляже|море|пляж/i.test(t)) entities.type = 'beach';
+    else if (/горн|лыж/i.test(t)) entities.type = 'mountain';
+    else if (/городск|центр/i.test(t)) entities.type = 'city';
+    // Hotel name
+    var hotelNames = ['Sunrise Beach', 'Горная Вершина', 'Tropical Island', 'Grand Plaza', 'Речной Бриз', 'Alpine Comfort', 'Солнечный Берег', 'Морская Звезда', 'Royal Palace', 'Зелёная Роща', 'Blue Lagoon', 'Аврора', 'Романтика', 'Серебряный Пляж', 'Golden Sands', 'Усадьба Лесная', 'Azure Coast', 'Коралловый Риф'];
+    for (var i = 0; i < hotelNames.length; i++) {
+      if (t.toLowerCase().indexOf(hotelNames[i].toLowerCase()) !== -1) { entities.hotel = hotelNames[i]; break; }
+    }
+    return entities;
+  }
+
+  // Check local regex for instant answers (greetings, thanks, etc.)
+  function localClassify(text) {
+    var t = text.trim();
+    for (var i = 0; i < LOCAL_REGEX.length; i++) {
+      if (LOCAL_REGEX[i].rx.test(t)) return LOCAL_REGEX[i];
+    }
+    return null;
+  }
+
+  // Compare regex entities vs ML entities — returns discrepancy text or null
+  function compareEntities(regexEnt, mlEnt) {
+    var issues = [];
+    // City mismatch
+    if (regexEnt.city && mlEnt.city && regexEnt.city.toLowerCase() !== mlEnt.city.toLowerCase()) {
+      issues.push('Regex нашёл город "' + regexEnt.city + '", ML определил "' + mlEnt.city + '"');
+    }
+    // Price mismatch (if both present and very different)
+    if (regexEnt.price_max && mlEnt.price_max && Math.abs(regexEnt.price_max - mlEnt.price_max) > 5000) {
+      issues.push('Regex: макс ' + regexEnt.price_max + '₽, ML: макс ' + mlEnt.price_max + '₽');
+    }
+    // Amenities mismatch
+    if (regexEnt.amenities.length > 0 && mlEnt.amenities && mlEnt.amenities.length > 0) {
+      var rSet = regexEnt.amenities.sort().join(',');
+      var mSet = mlEnt.amenities.sort().join(',');
+      if (rSet !== mSet) issues.push('Regex удобства: ' + rSet + ', ML: ' + mSet);
+    }
+    // City found by one but not the other
+    if (regexEnt.city && !mlEnt.city) issues.push('Город "' + regexEnt.city + '" найден regex, но не ML');
+    if (!regexEnt.city && mlEnt.city) issues.push('Город "' + mlEnt.city + '" найден ML, но не regex');
+    return issues.length > 0 ? issues.join('. ') : null;
+  }
+
+  // ---------- ENSEMBLE: regex + ML server, no LLM ----------
+  async function doSendWithLLM(text) {
+    if (!text.trim()) return;
+    var _start = performance.now();
+    addMsg('user', text);
+    input.value = '';
+
+    // Layer 1: Local regex — instant entity extraction + instant answers
+    var localMatch = localClassify(text);
+    var q1 = regexExtract(text);
+
+    // Instant answers for greetings/thanks/etc — skip ML
+    if (localMatch && (localMatch.intent === 'greeting' || localMatch.intent === 'farewell'
+        || localMatch.intent === 'thanks' || localMatch.intent === 'help'
+        || localMatch.intent === 'joke' || localMatch.intent === 'count')) {
+      console.log('[Ensemble] Layer1 instant:', localMatch.intent, '| Time:', Math.round(performance.now() - _start), 'ms');
+      addMsg('bot', localMatch.answer);
+      addChips(QUICK_CHIPS);
+      return;
+    }
+
+    // Layer 2: Server ML — always runs
+    showTyping();
+    try {
+      var data = await askBot(text);
+      if (!data.ok) throw new Error(data.error || '\u041E\u0448\u0438\u0431\u043A\u0430');
+      removeTyping();
+
+      var mlEntities = data.ml_entities || {};
+      var mlAnswer = data.ml_answer || data.answer;
+      var mlConfidence = data.confidence || 0;
+      var mlIntent = data._debug ? data._debug.ml_intent : 'unknown';
+
+      console.log('[Ensemble] Layer2 ML:', '| intent:', mlIntent,
+        '| conf:', mlConfidence,
+        '| city:', mlEntities.city || '-',
+        '| Time:', data._debug ? data._debug.total_time_ms : '?', 'ms');
+
+      // --- ENSEMBLE MERGE: regex + ML ---
+      // Regex city always wins
+      if (q1.city && mlEntities.city && q1.city.toLowerCase() !== mlEntities.city.toLowerCase()) {
+        console.log('[Ensemble] Regex city overrides ML: ' + q1.city + ' > ' + mlEntities.city);
+        mlEntities.city = q1.city;
+      } else if (q1.city && !mlEntities.city) {
+        mlEntities.city = q1.city;
+      } else if (!q1.city && mlEntities.city) {
+        q1.city = mlEntities.city;
+      }
+
+      // Merge amenities
+      var mergedAmenities = (q1.amenities || []).slice();
+      if (mlEntities.amenities) {
+        mlEntities.amenities.forEach(function(a) { if (mergedAmenities.indexOf(a) === -1) mergedAmenities.push(a); });
+      }
+      q1.amenities = mergedAmenities;
+
+      // Merge price (regex wins if both present)
+      if (!q1.price_max && mlEntities.price_max) q1.price_max = mlEntities.price_max;
+      if (!q1.price_min && mlEntities.price_min) q1.price_min = mlEntities.price_min;
+      if (!q1.stars && (mlEntities.stars || data.filters && data.filters.stars)) q1.stars = mlEntities.stars || data.filters.stars;
+
+      // Merge guests
+      if (!q1.guests && (mlEntities.guests || data.filters && data.filters.guests)) q1.guests = mlEntities.guests || data.filters.guests;
+
+      console.log('[Ensemble] Merged:', JSON.stringify({city: q1.city, price_max: q1.price_max, amenities: q1.amenities, guests: q1.guests, stars: q1.stars}));
+
+      // Compare Layer 1 and Layer 2
+      var discrepancy = compareEntities(q1, mlEntities);
+      if (discrepancy) console.log('[Ensemble] Discrepancy:', discrepancy);
+
+      // --- CLARIFYING QUESTIONS: what's missing? ---
+      var intentIsSearch = mlIntent === 'search' || q1.city || q1.amenities.length > 0 || q1.price_max;
+      var missingFields = [];
+      // Мульти-ход: если уже есть активный контекст с результатами поиска/выбора —
+      // это уточнение (рефинемент), не переспрашиваем город/даты заново
+      var refineFollowUp = ctx.state === 'SEARCH_RESULTS' || ctx.state === 'AWAITING_SELECTION';
+      if (!q1.city && !data.filters.city && !refineFollowUp) missingFields.push('city');
+      if (!q1.checkin && !data.filters.checkin && intentIsSearch && !refineFollowUp) missingFields.push('dates');
+
+      if (intentIsSearch && missingFields.length > 0) {
+        var clarify = '';
+        if (missingFields.indexOf('city') !== -1 && missingFields.indexOf('dates') !== -1) {
+          clarify = 'В каком городе и на какие даты ищете отель? Например: «Москва, 10-15 августа».';
+        } else if (missingFields.indexOf('city') !== -1) {
+          clarify = 'В каком городе ищете отель? Напишите название — например: «Москва», «Сочи» или «Париж».';
+        } else if (missingFields.indexOf('dates') !== -1) {
+          clarify = 'На какие даты нужен отель? Укажите дату заезда — например: «с 10 по 15 августа» или «на выходные».';
+        }
+        if (clarify) {
+          console.log('[Ensemble] Clarifying:', clarify);
+          addMsg('bot', clarify);
+          addChips(['🏖 Отель у моря в Сочи', '💰 Отели до 10 000 ₽', '⭐ Лучшие отели']);
+          return;
+        }
+      }
+
+      // If in active booking flow — follow server's lead (booking state machine is complex)
+      if (flow || data.flow === 'book') {
+        console.log('[Ensemble] Active flow — using server response directly');
+        addMsg('bot', data.answer);
+        remember(data);
+        if (data.flow === 'book') {
+          startFlow(data);
+          if (data.hotelId) {
+            flow.hotelId = data.hotelId;
+            flow.hotelName = data.hotel;
+            ctx.hotel = data.hotel;
+            ctx.hotelId = data.hotelId;
+            if (data.filters && data.filters.city) ctx.city = data.filters.city;
+            var hh = await resolveHotel(data.hotelId);
+            if (hh) { flow.hotelPrice = hh.price; if (hh.city) ctx.city = hh.city; }
+            advanceFlow();
+          } else if (data.suggestions && data.suggestions.length) {
+            flow.suggest = true;
+            flow.hotelOptions = data.suggestions;
+            addMsg('bot', '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0442\u0435\u043B\u044C \u043A\u043D\u043E\u043F\u043A\u043E\u0439 \u043D\u0438\u0436\u0435 \u0438\u043B\u0438 \u043D\u0430\u043F\u0438\u0448\u0438\u0442\u0435 \u00AB\u043E\u0442\u0435\u043B\u044C 8\u00BB / \u0441\u0441\u044B\u043B\u043A\u0443.');
+            addHotelChips(data.suggestions);
+          } else {
+            updateFlowChips();
+          }
+        } else {
+          if (data.suggestions && data.suggestions.length) addSuggestions(data.suggestions);
+          addChips(QUICK_CHIPS);
+        }
+        return;
+      }
+
+      // If regex found enough info — use it with server data
+      if (q1.city) {
+        console.log('[Ensemble] City found: ' + q1.city + ' — using server search');
+        addMsg('bot', data.answer);
+        remember(data);
+        if (data.suggestions && data.suggestions.length) addSuggestions(data.suggestions);
+        addChips(QUICK_CHIPS);
+        return;
+      }
+
+      // ML has reasonable answer — use it
+      if (mlConfidence >= 0.5 && mlIntent !== 'unknown') {
+        console.log('[Ensemble] ML answer (conf=' + mlConfidence + ')');
+        addMsg('bot', data.answer);
+        remember(data);
+        if (data.suggestions && data.suggestions.length) addSuggestions(data.suggestions);
+        addChips(QUICK_CHIPS);
+        return;
+      }
+
+      // Nothing worked — ask clarifying question
+      console.log('[Ensemble] No city, ML weak — asking clarifying question');
+      addMsg('bot', 'Я не совсем понял. В каком городе ищете отель? Напишите название — например: «Москва», «Сочи» или «Париж».');
+      addChips(QUICK_CHIPS);
+
+    } catch (err) {
+      removeTyping();
+      console.warn('[Ensemble] Error:', err.message, '| Time:', Math.round(performance.now() - _start), 'ms');
+      addMsg('bot', '\u041E\u0439, \u0447\u0442\u043E-\u0442\u043E \u043F\u043E\u0448\u043B\u043E \u043D\u0435 \u0442\u0430\u043A. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.');
+      addChips(QUICK_CHIPS);
+    }
+  }
+
+  // Override doSend to use ensemble architecture
+  var _originalDoSend = doSend;
+  doSend = doSendWithLLM;
 
   toggleBtn.addEventListener('click', open);
   closeBtn.addEventListener('click', close);

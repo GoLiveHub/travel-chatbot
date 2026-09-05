@@ -2,6 +2,12 @@
 // Страница поиска отелей
 require __DIR__ . '/api/config.php';
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    http_response_code(405);
+    header('Allow: GET');
+    exit('Method Not Allowed');
+}
+
 $type = $_GET['type'] ?? 'all';
 $city = trim((string) ($_GET['city'] ?? ''));
 $cities = load_json('cities.json');
@@ -16,9 +22,9 @@ $guests = max(1, min(8, (int) ($_GET['guests'] ?? 2)));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Поиск отелей — Travel.ru</title>
     <meta name="description" content="Найдите отель под ваш бюджет и пожелания.">
-        <script src="/assets/js/theme.js"></script>
+        <script src="/assets/js/theme.js?v=20260901-c"></script>
 <link rel="stylesheet" href="/assets/css/tailwind.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20260901-c">
     <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">

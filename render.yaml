@@ -1,23 +1,8 @@
 services:
   - type: web
-    name: travel-chatbot
+    name: travel-demo
     runtime: docker
-    # plan: free -> starter ($7/mo) для продакшна: автоскейлинг, нет sleep, custom domain + SSL
     plan: free
-    env: php
-    dockerfilePath: Dockerfile
-    envVars:
-      - key: APP_BASE_URL
-        sync: false
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: SENTRY_DSN
-        sync: false
-    disk:
-      name: travel-data
-      mountPath: /var/www/html/data
-      sizeGB: 1
-    healthCheckPath: /api/health.php
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz.php
     autoDeploy: true

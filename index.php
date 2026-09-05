@@ -42,9 +42,9 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
       }
     }
     </script>
-        <script src="/assets/js/theme.js"></script>
+        <script src="/assets/js/theme.js?v=20260901-c"></script>
 <link rel="stylesheet" href="/assets/css/tailwind.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20260901-c">
     <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
@@ -52,8 +52,11 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 <?php include __DIR__ . '/components/header.php'; ?>
 
 <!-- Герой -->
-<section class="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-teal-500">
-    <div class="absolute inset-0 opacity-15" style="background-image:url('/assets/img/hero.jpg');background-size:cover;background-position:center;"></div>
+<section class="hero-aura relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-teal-500">
+    <div class="hero-img-zoom absolute inset-0 opacity-15" style="background-image:url('/assets/img/hero.jpg');background-size:cover;background-position:center;"></div>
+    <div class="hero-mesh" aria-hidden="true"></div>
+    <div class="aurora-blob aurora-blob--purple" aria-hidden="true"></div>
+    <div class="aurora-blob aurora-blob--teal" aria-hidden="true"></div>
     <div class="relative mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 sm:py-28">
         <h1 class="text-4xl font-extrabold text-white sm:text-5xl">Найдите отель для <span class="text-teal-200">идеального отдыха</span></h1>
         <p class="mx-auto mt-4 max-w-2xl text-lg text-white/80">Пляжи, горы и города — более 30 проверенных отелей. Поиск, сравнение и бронирование в несколько кликов.</p>
@@ -78,31 +81,32 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
             <label class="rounded-xl border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500">Гостей
                 <select name="guests" class="block w-full bg-transparent py-1 text-sm text-slate-900 focus:outline-none"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
             </label>
-            <button type="submit" class="rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 px-8 py-3 font-semibold text-white transition hover:shadow-lg sm:col-span-2 lg:col-span-1">Найти</button>
+            <button type="submit" class="hero-cta rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 px-8 py-3 font-semibold text-white transition hover:shadow-lg sm:col-span-2 lg:col-span-1">Найти</button>
         </form>
 
         <div class="mt-6 flex flex-wrap justify-center gap-2 text-sm">
-            <a href="/search.php?type=beach" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Пляжный отдых</a>
-            <a href="/search.php?type=mountain" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Горнолыжный</a>
-            <a href="/search.php" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Все отели</a>
+<a href="/search.php?type=beach" class="hero-chip rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Пляжный отдых</a>
+            <a href="/search.php?type=mountain" class="hero-chip rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Горнолыжный</a>
+            <a href="/search.php" class="hero-chip rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Все отели</a>
         </div>
     </div>
+    <div class="hero-wave" aria-hidden="true"><span></span><span></span></div>
 </section>
 
 <!-- Статистика -->
 <section class="border-b border-slate-200 bg-white">
     <div class="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 text-center sm:px-6 md:grid-cols-4">
-        <div><div class="text-3xl font-extrabold text-teal-600"><?= count($hotels) ?>+</div><div class="text-sm text-slate-500">отелей</div></div>
-        <div><div class="text-3xl font-extrabold text-teal-600"><?= count($cities) ?></div><div class="text-sm text-slate-500">направлений</div></div>
+        <div><div class="stat-val text-3xl font-extrabold text-teal-600" data-count="<?= count($hotels) ?>" data-suffix="+"><?= count($hotels) ?>+</div><div class="text-sm text-slate-500">отелей</div></div>
+        <div><div class="stat-val text-3xl font-extrabold text-teal-600" data-count="<?= count($cities) ?>"><?= count($cities) ?></div><div class="text-sm text-slate-500">направлений</div></div>
         <div><div class="text-3xl font-extrabold text-teal-600">24/7</div><div class="text-sm text-slate-500">поддержка</div></div>
-        <div><div class="text-3xl font-extrabold text-teal-600">50 000+</div><div class="text-sm text-slate-500">туристов</div></div>
+        <div><div class="stat-val text-3xl font-extrabold text-teal-600" data-count="50000" data-suffix="+">50 000+</div><div class="text-sm text-slate-500">туристов</div></div>
     </div>
 </section>
 
 <!-- Каталог с вкладками -->
 <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
     <div class="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <h2 class="text-3xl font-extrabold text-slate-900">Популярные отели</h2>
+        <h2 class="grad-head text-3xl font-extrabold">Популярные отели</h2>
         <div class="flex gap-2 rounded-full border border-slate-200 bg-white p-1" role="tablist" aria-label="Категории отелей">
             <button type="button" role="tab" aria-selected="true" aria-controls="pane-all" class="home-tab rounded-full px-4 py-1.5 text-sm font-semibold tab-active bg-teal-500 text-white" data-tab="all">Популярное</button>
             <button type="button" role="tab" aria-selected="false" aria-controls="pane-beach" class="home-tab rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 transition" data-tab="beach">Пляж</button>
@@ -112,17 +116,17 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 
     <div id="pane-all" class="home-pane grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <?php foreach ($featured as $hotel): ?>
-            <div class="fade-in-up"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
+            <div class="reveal"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
         <?php endforeach; ?>
     </div>
     <div id="pane-beach" class="home-pane hidden grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <?php foreach ($beach as $hotel): ?>
-            <div class="fade-in-up"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
+            <div class="reveal"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
         <?php endforeach; ?>
     </div>
     <div id="pane-mountain" class="home-pane hidden grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <?php foreach ($mountain as $hotel): ?>
-            <div class="fade-in-up"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
+            <div class="reveal"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
         <?php endforeach; ?>
     </div>
 </section>
@@ -130,10 +134,10 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 <!-- Направления -->
 <section class="bg-white">
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h2 class="text-3xl font-extrabold text-slate-900">Популярные направления</h2>
+        <h2 class="grad-head text-3xl font-extrabold">Популярные направления</h2>
         <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <?php foreach ($cities as $i => $c): ?>
-                <a href="/search.php?city=<?= urlencode($c['name']) ?>" class="group relative overflow-hidden rounded-2xl aspect-[3/4]">
+                <a href="/search.php?city=<?= urlencode($c['name']) ?>" class="city-card reveal group relative overflow-hidden rounded-2xl aspect-[3/4]">
                     <img src="/assets/<?= htmlspecialchars($c['image']) ?>" alt="<?= htmlspecialchars($c['name']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div class="absolute bottom-3 left-3 right-3 text-white">
@@ -149,7 +153,7 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 <!-- Отзывы гостей -->
 <section class="bg-gradient-to-b from-white to-slate-50">
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h2 class="text-center text-3xl font-extrabold text-slate-900">Что говорят гости</h2>
+        <h2 class="grad-head text-center text-3xl font-extrabold">Что говорят гости</h2>
         <div class="mt-8 grid gap-6 md:grid-cols-3">
             <?php
             $testimonials = [
@@ -165,7 +169,7 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
             ];
             foreach ($testimonials as $t):
             ?>
-            <figure class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <figure class="reveal rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex text-amber-400"><?= str_repeat('★', $t['stars']) ?><?= str_repeat('☆', 5 - $t['stars']) ?></div>
                 <blockquote class="mt-3 text-sm leading-relaxed text-slate-600">«<?= htmlspecialchars($t['text']) ?>»</blockquote>
                 <figcaption class="mt-4 flex items-center gap-3">
@@ -183,20 +187,23 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
 
 <!-- Преимущества -->
 <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-    <h2 class="text-center text-3xl font-extrabold text-slate-900">Почему Travel.ru?</h2>
+    <h2 class="grad-head text-center text-3xl font-extrabold">Почему Travel.ru?</h2>
     <div class="mt-8 grid gap-6 sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+<div class="reveal rounded-2xl border border-slate-200 bg-white p-6 text-center">
             <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s6-3.5 6-8V6l-6-3-6 3v8c0 4.5 6 8 6 8z"></path><path d="M9 12l2 2 4-4"></path></svg></div>
             <h3 class="mt-4 font-bold text-slate-900">Безопасная бронь</h3>
             <p class="mt-2 text-sm text-slate-500">Подтверждение бронирования сразу, честные цены без скрытых платежей.</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+        <div class="reveal rounded-2xl border border-slate-200 bg-white p-6 text-center">
             <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a19.5 19.5 0 0 1 9.8-2.2c3.4 0 6.7 1.4 9.2 2.2"></path><path d="M12 13.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4z"></path></svg></div>
             <h3 class="mt-4 font-bold text-slate-900">Умный помощник</h3>
             <p class="mt-2 text-sm text-slate-500">Чат-бот подберёт отель по вашим пожеланиям на естественном языке.</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+        <div class="reveal rounded-2xl border border-slate-200 bg-white p-6 text-center">
             <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+            <h3 class="mt-4 font-bold text-slate-900">Поддержка 24/7</h3>
+            <p class="mt-2 text-sm text-slate-500">Отвечаем на вопросы до, во время и после поездки.</p>
+        </div>
             <h3 class="mt-4 font-bold text-slate-900">Поддержка 24/7</h3>
             <p class="mt-2 text-sm text-slate-500">Отвечаем на вопросы до, во время и после поездки.</p>
         </div>

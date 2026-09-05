@@ -9,9 +9,14 @@
     try {
       var ref = this.dataset.ref;
       var token = this.dataset.token;
+      var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+      var csrfToken = csrfMeta ? csrfMeta.content : '';
       var response = await fetch(window.API_BASE + '/cancel-booking.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
         body: JSON.stringify({ ref: ref, token: token }),
       });
       var data = await response.json();

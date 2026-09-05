@@ -67,3 +67,10 @@
     </form>
 </div>
 <script src="/assets/js/sentry.js" defer></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function() {});
+  });
+}
+</script>

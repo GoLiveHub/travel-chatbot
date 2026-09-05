@@ -245,6 +245,11 @@ function rate_limit(string $key, int $maxRequests, int $windowSeconds): void
         }
     }
 
+    // Оппортунистическая автоочистка: ~1 раз на 50 вызовов, чтобы не тормозить.
+    if (random_int(1, 50) === 1) {
+        rate_limit_cleanup();
+    }
+
     $file = $dir . '/' . preg_replace('/[^a-z0-9_\-]/i', '_', $key) . '_' . md5($ip) . '.json';
     $now = time();
     $data = ['requests' => [], 'blocked_until' => 0];
@@ -294,6 +299,57 @@ function rate_limit(string $key, int $maxRequests, int $windowSeconds): void
     fwrite($fp, json_encode($data));
     flock($fp, LOCK_UN);
     fclose($fp);
+}
+
+// --- Автоочистка rate-limit файлов ---
+// Файлы вида <key>_<md5(ip)>.json могут накапливаться навсегда (например, когда IP
+// ушёл и больше не возвращается). Файл «мёртв», если:
+//   - от последнего запроса прошло больше $maxIdleSeconds, И
+//   - активная блокировка не действует.
+// Вызывается оппортунистически из rate_limit() с малой вероятностью, чтобы не
+// тормозить обычные запросы и не требовать cron.
+function rate_limit_cleanup(int $maxIdleSeconds = 3600): void
+{
+    $dir = DATA_DIR . '/rate_limits';
+    if (!is_dir($dir)) return;
+
+    $now = time();
+    foreach (glob($dir . '/*_*.json') ?: [] as $file) {
+        if (!is_file($file)) continue;
+        // Файл прямо сейчас пишется другими запросами — пропускаем (non-blocking)
+        $fp = @fopen($file, 'c+');
+        if ($fp === false) continue;
+        if (!flock($fp, LOCK_EX | LOCK_NB)) {
+            fclose($fp);
+            continue;
+        }
+        $raw = stream_get_contents($fp);
+        $dead = false;
+        if ($raw !== false && $raw !== '') {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                $requests = (array) ($decoded['requests'] ?? []);
+                $blockedUntil = (int) ($decoded['blocked_until'] ?? 0);
+                $last = 0;
+                foreach ($requests as $ts) {
+                    if ((int) $ts > $last) $last = (int) $ts;
+                }
+                // Мёртв: без свежих запросов И без действующей блокировки
+                $expired = $last === 0 || ($now - $last) > $maxIdleSeconds;
+                $noActiveBlock = $blockedUntil <= $now;
+                $dead = $expired && $noActiveBlock;
+            } else {
+                // Битый/не-JSON файл — безопасно удалить
+                $dead = true;
+            }
+        } else {
+            // Пустой файл — безопасно удалить
+            $dead = true;
+        }
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        if ($dead) @unlink($file);
+    }
 }
 
 // --- Сессионная авторизация ---

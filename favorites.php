@@ -21,9 +21,9 @@ $total = count($hotels);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Избранное — Travel.ru</title>
     <meta name="description" content="Сохранённые отели.">
-        <script src="/assets/js/theme.js"></script>
+        <script src="/assets/js/theme.js?v=20260901-c"></script>
 <link rel="stylesheet" href="/assets/css/tailwind.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20260901-c">
     <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
@@ -50,7 +50,7 @@ $total = count($hotels);
 
     <div id="fav-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <?php foreach ($favHotels as $hotel): ?>
-            <div class="fade-in-up"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
+            <div class="reveal"><?php include __DIR__ . '/components/hotel-card.php'; ?></div>
         <?php endforeach; ?>
     </div>
 </main>

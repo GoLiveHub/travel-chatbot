@@ -20,9 +20,9 @@ if ($searched && preg_match('/^TRV-[A-F0-9]{6,8}$/', $ref)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мои бронирования — Travel.ru</title>
     <meta name="description" content="Безопасный поиск и управление бронированием.">
-    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/theme.js?v=20260901-c"></script>
     <link rel="stylesheet" href="/assets/css/tailwind.min.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20260901-c">
     <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">

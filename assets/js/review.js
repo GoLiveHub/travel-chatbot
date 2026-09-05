@@ -38,9 +38,14 @@
     btn.disabled = true;
     btn.textContent = 'Отправляем…';
     try {
+      const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+      const csrfToken = csrfMeta ? csrfMeta.content : '';
       const res = await fetch(window.API_BASE + '/review.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
         body: JSON.stringify(payload),
       });
       const data = await res.json();

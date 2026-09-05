@@ -141,7 +141,8 @@ $response = [
     'nights' => $nights,
     'total' => $total,
     'message' => 'Бронирование принято! В демо-версии заявка сохранена в журнал.',
-    'confirmation_url' => '/booking-confirm.php?ref=' . rawurlencode($ref),
+    'confirmation_url' => '/booking-confirm.php?ref=' . rawurlencode($ref) . '&token=' . rawurlencode($accessToken),
+    'access_token' => $accessToken,
 ];
 if ($promoApplied) {
     $response['promo'] = $promoApplied;

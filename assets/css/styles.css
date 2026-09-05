@@ -121,3 +121,77 @@ html.dark img[loading="lazy"] { background: #1e293b; }
 .chat-typing i:nth-child(2) { animation-delay: .2s; }
 .chat-typing i:nth-child(3) { animation-delay: .4s; }
 #chat-chips:empty { display: none; }
+
+/* ================= Дизайн-полировка ================= */
+
+/* Плавное появление при прокрутке (включается только при наличии JS) */
+html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; will-change: opacity, transform; }
+html.js .reveal.is-visible { opacity: 1; transform: none; }
+html.js .reveal:nth-child(2) { transition-delay: .06s; }
+html.js .reveal:nth-child(3) { transition-delay: .12s; }
+html.js .reveal:nth-child(4) { transition-delay: .18s; }
+html.js .reveal:nth-child(5) { transition-delay: .24s; }
+html.js .reveal:nth-child(6) { transition-delay: .3s; }
+
+/* Живой градиент на hero-секции */
+@keyframes hero-flow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.hero-aura { background-size: 220% 220%; animation: hero-flow 12s ease-in-out infinite; }
+
+/* Mesh-слой: три цветных пятна, плавно «дышат» (шейдерный эффект) */
+.hero-mesh { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hero-mesh::before, .hero-mesh::after {
+  content: ''; position: absolute; border-radius: 9999px; filter: blur(60px); opacity: .55;
+  animation: mesh-drift 16s ease-in-out infinite;
+}
+.hero-mesh::before { width: 46rem; height: 34rem; background: rgba(56, 189, 248, .55); top: -12rem; left: -8rem; }
+.hero-mesh::after { width: 40rem; height: 40rem; background: rgba(232, 121, 249, .4); bottom: -14rem; right: -10rem; animation-duration: 20s; animation-direction: reverse; }
+@keyframes mesh-drift { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(3rem, 2rem) scale(1.18); } }
+
+/* Медленный зум фоновой картинки hero */
+@keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+.hero-img-zoom { animation: hero-zoom 30s ease-in-out infinite alternate; }
+
+/* Aurora-пятна поверх градиента (шейдерный акцент) */
+.aurora-blob { position: absolute; border-radius: 9999px; filter: blur(60px); opacity: .45; pointer-events: none; animation: aurora-float 22s ease-in-out infinite; }
+.aurora-blob--purple { top: -8rem; right: -10rem; width: 34rem; height: 34rem; background: rgba(192, 132, 252, .6); }
+.aurora-blob--teal { bottom: -14rem; left: -10rem; width: 28rem; height: 28rem; background: rgba(94, 234, 212, .6); }
+@keyframes aurora-float { 0%, 100% { transform: translate(-6%, -4%) scale(1); } 50% { transform: translate(7%, 6%) scale(1.18); } }
+
+/* Волна-переход hero -> контент (живой шейдер) */
+.hero-wave { position: absolute; left: 0; right: 0; bottom: -46px; height: 78px; pointer-events: none; }
+.hero-wave span { position: absolute; left: -20%; right: -20%; top: 0; height: 100%; border-radius: 50% 50% 0 0 / 100% 100% 0 0; background: #ffffff; }
+.hero-wave span:first-child { animation: wave-flow 8s ease-in-out infinite alternate; opacity: .85; }
+.hero-wave span:last-child { animation: wave-flow 12s ease-in-out infinite alternate-reverse; opacity: .55; }
+@keyframes wave-flow { from { transform: translateX(-2.5%); } to { transform: translateX(2.5%); } }
+html.dark .hero-wave span { background: #1e293b; }
+
+/* Градиентные заголовки с плавным переливом */
+@keyframes grad-flow { to { background-position: 200% center; } }
+.grad-head {
+  background: linear-gradient(120deg, #2563eb, #0d9488, #34d399, #2563eb);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: grad-flow 6s linear infinite;
+}
+
+/* Пульсирующее свечение CTA в hero */
+@keyframes hero-pulse { 0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, .55); } 70% { box-shadow: 0 0 0 14px rgba(45, 212, 191, 0); } 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); } }
+.hero-cta { animation: hero-pulse 2.8s ease-out infinite; }
+.hero-chip { transition: transform .25s ease, background-color .25s ease; }
+.hero-chip:hover { transform: scale(1.06); }
+
+/* Подъём карточек отелей при наведении */
+article.group { transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+article.group:hover { transform: translateY(-4px); box-shadow: 0 22px 45px -18px rgba(2, 132, 199, .35); border-color: rgba(45, 212, 191, .45); }
+
+/* Подъём карточек направлений */
+.city-card { transition: transform .35s ease, box-shadow .35s ease; }
+.city-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -16px rgba(2, 132, 199, .4); }
+
+/* CTA-кнопки: плавное смещение градиента на hover */
+button.bg-gradient-to-r, a.bg-gradient-to-r {
+  background-size: 180% 180%;
+  transition: background-position .7s ease, box-shadow .3s ease, transform .2s ease;
+}
+button.bg-gradient-to-r:hover, a.bg-gradient-to-r:hover { background-position: 100% 50%; }

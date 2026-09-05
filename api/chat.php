@@ -2,6 +2,12 @@
 // api/chat.php — ИИ-ассистент подбора отелей и бронирования
 declare(strict_types=1);
 require __DIR__ . '/config.php';
+require_once __DIR__ . '/MlIntentClassifier.php';
+
+// --- Timing & layer logging ---
+$_chatStart = microtime(true);
+$_layer = 'unknown';
+$_intentSource = 'none';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     h_error('Метод не поддерживается', 405);
@@ -19,6 +25,7 @@ if (!is_array($input)) {
 $text = trim((string) ($input['text'] ?? ''));
 if ($text === '') {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Похоже, сообщение пустое. Напишите, что вам нужно — например: «отели в Москве» или «промокоды».',
         'suggestions' => [], 'flow' => null, 'state' => 'IDLE',
@@ -35,28 +42,21 @@ $textLower = mb_strtolower($text);
 $hotels = load_json('hotels.json');
 $cities = load_json('cities.json');
 
-// --- ML-классификатор (PHP-ML: NaiveBayes + TF-IDF) ---
+// --- ML-классификатор v3 (2959+ фраз, полный выход сущностей) ---
 $mlClassifier = null;
 $mlIntent = null;
 $mlConfidence = 0.0;
+$mlEntities = ['city' => null, 'price_min' => null, 'price_max' => null, 'checkin' => null, 'checkout' => null, 'guests' => null, 'stars' => null, 'amenities' => [], 'type' => null];
+$_mlTime = 0.0;
 if (class_exists('MlIntentClassifier')) {
-    $mlCachePath = data_path('ml_model.cache');
     $mlClassifier = new MlIntentClassifier();
-    if (file_exists($mlCachePath) && filesize($mlCachePath) > 0) {
-        $mlClassifier = unserialize(file_get_contents($mlCachePath));
-        if ($mlClassifier !== false && $mlClassifier->isTrained()) {
-            [$mlIntent, $mlConfidence] = $mlClassifier->classify($text);
-        } else {
-            $mlClassifier = new MlIntentClassifier();
-            $mlClassifier->train();
-            file_put_contents($mlCachePath, serialize($mlClassifier));
-            [$mlIntent, $mlConfidence] = $mlClassifier->classify($text);
-        }
-    } else {
-        $mlClassifier->train();
-        file_put_contents($mlCachePath, serialize($mlClassifier));
-        [$mlIntent, $mlConfidence] = $mlClassifier->classify($text);
-    }
+    $_mlStart = microtime(true);
+    $mlResult = $mlClassifier->classify($text);
+    $mlIntent = $mlResult['intent'] ?? 'unknown';
+    $mlConfidence = $mlResult['confidence'] ?? 0.0;
+    $mlEntities = $mlResult['entities'] ?? $mlEntities;
+    $_mlTime = round((microtime(true) - $_mlStart) * 1000, 1);
+    if ($mlIntent !== null && $mlConfidence > 0) $_layer = 'ml';
 }
 
 // --- Транслитерация для поиска отелей и городов по-английски и «русским произношением» ---
@@ -187,6 +187,7 @@ function extract_name(string $text): ?string
     $patterns = [
         '/(?:меня зовут|меня звать|меня зову|зовут|звать|моё имя|мое имя|имя)\s+([А-ЯЁа-яё]+)/u',
         '/\bя\s+([А-ЯЁа-яё][а-яё]+)(?=[,\s.!?«"\-—]|$)/iu',
+        '/^([А-ЯЁа-яё][а-яё]{2,20})\s*,/u',
     ];
     $stop = ['отель', 'хочу', 'хочешь', 'хотим', 'бронь', 'бронька', 'забронировать', 'да', 'нет', 'приеду', 'еду',
         'поехать', 'подобрать', 'ищу', 'посоветуй', 'ждём', 'уверен', 'знаю', 'понимаю', 'люблю',
@@ -215,7 +216,7 @@ function extract_guests(string $textLower): ?int
     if (preg_match('/втро[её]м|нас трое|будет трое|на троих|для троих/ui', $textLower)) return 3;
     if (preg_match('/вчетверо[её]м|нас четверо|будет четверо|на четверых|для четверых/ui', $textLower)) return 4;
     if (preg_match('/впятеро[её]м|нас пятеро|будет пятеро|на пятерых|для пятерых/ui', $textLower)) return 5;
-    if (preg_match('/с\s+(женой|женою|мужем|мужою|супруг|супругой|девушкой|парнем|подругой|сыном|дочерью|другом|другом|мамой|папой|братом|сестрой|коллегой)|вдво[её]м|на двоих|для двоих|нас двое/ui', $textLower)) return 2;
+    if (preg_match('/с\s+(женой|женою|мужем|мужою|супруг|супругой|девушкой|парнем|подругой|сыном|дочерью|другом|мамой|папой|братом|сестрой|коллегой)|вдво[её]м|на двоих|для двоих|нас двое/ui', $textLower)) return 2;
     if (preg_match('/(\d{1,2})\s*(?:гост|человек|персон)/u', $textLower, $m)) {
         $g = (int) $m[1];
         if ($g >= 1 && $g <= 8) return $g;
@@ -338,7 +339,7 @@ function extract_dates(string $textLower): ?array
 // --- Город и его синонимы ---
 $cityAliases = [
     'питер' => 'Санкт-Петербург', 'петербург' => 'Санкт-Петербург', 'спб' => 'Санкт-Петербург',
-    'константинопол' => 'Стамбул',
+    'мск' => 'Москва', 'константинопол' => 'Стамбул',
     // английские/транслит названия
     'moscow' => 'Москва', 'st. petersburg' => 'Санкт-Петербург', 'saint-petersburg' => 'Санкт-Петербург', 'petersburg' => 'Санкт-Петербург',
     'sochi' => 'Сочи', 'kazan' => 'Казань', 'paris' => 'Париж', 'rome' => 'Рим', 'barcelona' => 'Барселона',
@@ -349,7 +350,7 @@ $cityAliases = [
 ];
 // Стебли названий — чтобы понять склонения: «в москве», «в риме», «в барселоне»
 $cityStems = [
-    'москв' => 'Москва', 'санкт' => 'Санкт-Петербург', 'питер' => 'Санкт-Петербург',
+    'москв' => 'Москва', 'мск' => 'Москва', 'санкт' => 'Санкт-Петербург', 'питер' => 'Санкт-Петербург',
     'петербург' => 'Санкт-Петербург', 'спб' => 'Санкт-Петербург',
     'сочи' => 'Сочи', 'казан' => 'Казань', 'париж' => 'Париж', 'рим' => 'Рим',
     'барсел' => 'Барселона', 'анталь' => 'Анталья', 'стамбул' => 'Стамбул',
@@ -676,6 +677,7 @@ $totalEntities = count($allCitiesFound) + count($allCountriesFound);
 // Ровно 2 города (без стран) — уточнить выбор
 if (count($allCitiesFound) === 2 && empty($allCountriesFound) && !$insultHit) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Вы назвали два города: ' . cityPrep($allCitiesFound[0]) . ' и ' . cityPrep($allCitiesFound[1]) . '. В каком ищете отель? Или показать варианты в обоих?',
         'suggestions' => [],
@@ -692,6 +694,7 @@ if ($totalEntities >= 3 && !$insultHit) {
     foreach ($allCitiesFound as $ec) $entityNames[] = cityPrep($ec);
     foreach ($allCountriesFound as $ec) $entityNames[] = $ec;
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Вы назвали несколько направлений: ' . implode(', ', $entityNames) . '. Какое выбрать?',
         'suggestions' => [],
@@ -743,6 +746,15 @@ $intentUnknownCountry = false;
 // REFINEMENT: уточнение текущего поиска («дешевле», «без бассейна», «а с завтраком», «покажи другие»)
 if ($ctxState === 'SEARCH_RESULTS' || $ctxState === 'AWAITING_SELECTION') {
     $intentRefinement = (bool) preg_match('/дешевл|подешевле|без\s+(?:бассейн|пляж|спа|завтрак)|а\s+с\s+(?:завтрак\w*|бассейн\w*|пляж\w*|спа)|покажи\s+(?:другие|ещ[её])|ещ[её]\s+(?:один|вариант)|другой\s+вариант|а\s+(?:какие\s+ещ[её]|ещ[её]\s+(?:есть|вариант)|другие)|без\s+бассейна|а\s+без|не\s+(?:хочу|надо|нужен)\s+(?:бассейн|пляж|завтрак)/ui', $textLower);
+
+    // Более широкий рефинемент: одиночное «с <удобством>» / цена без нового города при активном поиске
+    // («с бассейном», «с завтраками», «до 10000», «от 5000», «подешевле», «дешевле»)
+    if (!$intentRefinement) {
+        $intentRefinement = (bool) preg_match('/(?:^|\s)(?:с|со)\s+(?:завтрак|бассейн|спа|пляж|wifi|wi-?fi|парковк|трансфер|террас|балкон|фитнес|кухн|море|вид)/u', $textLower)
+            || (bool) preg_match('/(?:с\s+)?(?:завтрак(?:ами|ом)?|бассейн(?:ом|ы)?|спа|трансфер|парковк|террас|балкон)\s+(?:есть|нужен|желателен|хочу)?\b/u', $textLower)
+            || (bool) preg_match('/(?:до|от|не\s+дороже|подешевле|дешевле|бюджет)\s+(\d|\p{N})/u', $textLower)
+            || (bool) preg_match('/(?:а\s+)?(?:ещ[её]\s+вариант|ещ[её]\s+отели|покажи\s+другое)\b/u', $textLower);
+    }
 }
 
 // PRICE_QUESTION: «почему дорого» / «зачем такие цены» — объясняем цены, НЕ сбрасываем контекст
@@ -824,6 +836,7 @@ if ($matchedCity === null && $matchedCountry === null && $hasActiveContext
             $availableCountries = array_unique(array_column($cities, 'country'));
             $countryList = implode(', ', $availableCountries);
             h_json([
+                'reset' => false,
                 'ok' => true,
                 'answer' => 'В каталоге пока нет отелей в ' . $followUpCountry . '. Доступные направления: ' . $countryList . '. Какое выбрать?',
                 'suggestions' => [],
@@ -852,7 +865,7 @@ $isNegationEarly = (bool) preg_match('/^(?:нет|неа|нетушки|ни з�
     || (bool) preg_match('/(?:хватит|стоп|перестань|передумал|я\s+передумал)/ui', $textLower);
 // Ранний детект изменения параметров — чтобы не сбрасывать контекст
 $isChangeEarly = (bool) preg_match('/(?:измени|изменить|поменяй|поменять|замени|заменить|другой\s+отел|другая\s+дата|другие\s+даты|другое\s+число|смен\w+|обнов\w+)/ui', $textLower);
-if (!$intentRefinement && $matchedCity === null && $hasActiveContext && !$isBookingText && !$intentHotelSelect && !$intentPriceQuestion && !$intentShow && !$intentComplaint && !$isNegationEarly && !$isChangeEarly) {
+if (!$intentRefinement && $matchedCity === null && $hasActiveContext && !$isBookingText && !$intentHotelSelect && !$intentPriceQuestion && !$intentShow && !$intentComplaint && !$isNegationEarly && !$isChangeEarly && $ctxState !== 'BOOKING_FLOW') {
     $contextHotel = '';
     $contextHotelId = 0;
     $contextCity = '';
@@ -1004,6 +1017,17 @@ foreach ($amenityMap as $kw => $amenity) {
     if ($pos !== false) {
         $amenityStart = max(0, $pos - 40);
         $beforeAmenity = mb_substr($scanText, $amenityStart, $pos - $amenityStart);
+        $endPos = $pos + mb_strlen($kw);
+        $charAfter = $endPos < mb_strlen($scanText) ? mb_substr($scanText, $endPos, 1) : '';
+        $charBefore = $pos > 0 ? mb_substr($scanText, $pos - 1, 1) : '';
+        // Не совпадает внутри другого слова слева («спа» не внутри «спальни»)
+        if ($charBefore !== '' && preg_match('/[\p{L}]/u', $charBefore)) continue;
+        // Справа разрешаем падежные окончания (бассейном, парковкой, завтраком),
+        // отклоняем только если дальше идёт другое цельное слово (бар → Барселона)
+        if ($charAfter !== '' && preg_match('/[\p{L}]/u', $charAfter)) {
+            $afterWord = mb_substr($scanText, $endPos, 6);
+            if (!preg_match('/^(?:ом|ом\b|а\b|е\b|у\b|ы\b|и\b|ам\b|ях\b|ой\b|я\b|ью\b|ей\b|ю\b|ыми\b|ых\b|ого\b|ому\b|ым\b|ое\b|ая\b|ую\b|ные\b|ный\b|ная\b)/u', $afterWord)) continue;
+        }
         if (preg_match('/(?:без|не нужен|не нужна|не нужно|исключи)\s*$/u', $beforeAmenity)) $excludedAmenities[$amenity] = true;
         else $wantedAmenities[$amenity] = true;
     }
@@ -1101,6 +1125,7 @@ if ($intentRefinement && empty($suggestions) && $contextCity !== '') {
     $minCtx = isset($ctxFilters['min']) ? number_format((int) $ctxFilters['min'], 0, '', ' ') : null;
     $answer = 'К сожалению, дешевле' . ($minCtx ? ' ' . $minCtx . ' ₽' : '') . ' в ' . cityPrep($contextCity) . ' уже нет — это самые доступные варианты. Можно увеличить бюджет или посмотреть другие города.';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $answer,
         'suggestions' => [],
@@ -1175,7 +1200,7 @@ if ($qNights === 1) {
         $qNights = 1;
     }
 }
-$prefill = [];
+$prefill = is_array($ctxIn['profile'] ?? null) ? $ctxIn['profile'] : [];
 if ($pName !== null) $prefill['name'] = $pName;
 if ($pPhone !== null) $prefill['phone'] = $pPhone;
 if ($pGuests !== null) $prefill['guests'] = $pGuests;
@@ -1193,6 +1218,7 @@ if ($intentReject) {
     $ctxSugIds = [];
     $ctxState = 'IDLE';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Понял, убираю прошлое направление. Какой город или страна вас интересуют? Или я подберу по вашим пожеланиям — просто опишите, что важно.',
         'suggestions' => [],
@@ -1206,11 +1232,40 @@ if ($intentReject) {
     exit;
 }
 
+// --- Популярные российские курорты вне каталога: честный ответ вместо галлюцинации ---
+$absentDests = ['ялт', 'анап', 'геленджик', 'судак', 'евпатори', 'алушт', 'феодоси', 'крым', 'крыму', 'крыме',
+    'дербент', 'кудепста', 'хоста', 'дагомыс', 'лазаревск', 'туапсе', 'коктебел', 'кисловодск', 'пятигорск',
+    'ессентуки', 'минеральн', 'чебоксар', 'калининград', 'калиград', 'светлогорск', 'зеленоградск', 'севастопол'];
+$absentHit = null;
+foreach ($absentDests as $ad) {
+    if (mb_strpos($textLower, $ad) !== false) { $absentHit = $ad; break; }
+}
+if ($absentHit !== null && $matchedCity === null && !preg_match('/забронир|бронь\b/ui', $textLower)) {
+    $absentCity = 'этом регионе';
+    if (preg_match('/\b(?:ялт\w*|анап\w*|геленджик\w*|судак\w*|евпатори\w*|алушт\w*|феодоси\w*|крым\w*|дербент\w*|кудепст\w*|хост\w*|дагомыс\w*|лазаревск\w*|туапсе|коктебел\w*|кисловодск\w*|пятигорск\w*|ессентук\w*|минеральн\w*|чебоксар\w*|калининград\w*|светлогорск\w*|зеленоградск\w*|севастопол\w*)/ui', $textLower, $mAbsent)) {
+        $absentCity = mb_strtoupper(mb_substr($mAbsent[0], 0, 1)) . mb_substr($mAbsent[0], 1);
+    }
+    $cityList = implode(', ', array_map(fn($c) => $c['name'], $cities));
+    h_json([
+        'reset' => false,
+        'ok' => true,
+        'answer' => 'Сейчас в нашем каталоге нет отелей в ' . $absentCity . ' — это направление пока не подключено. Доступные города: ' . $cityList . '. В каком подобрать отель?',
+        'suggestions' => [],
+        'flow' => null,
+        'state' => 'IDLE',
+        'hotel' => null, 'hotelId' => null,
+        'filters' => ['city' => null, 'min' => null, 'max' => null, 'amenities' => [], 'type' => null, 'stars' => null],
+        'prefill' => [],
+    ]);
+    exit;
+}
+
 // --- UNKNOWN_COUNTRY: страна не в каталоге ---
 if ($intentUnknownCountry && $matchedCity === null) {
     $availableCountries = array_unique(array_column($cities, 'country'));
     $countryList = implode(', ', $availableCountries);
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'В каталоге пока нет отелей в ' . ($matchedCountry ?? 'этой стране') . '. Доступные направления: ' . $countryList . '. Какое выбрать?',
         'suggestions' => [],
@@ -1236,6 +1291,7 @@ if ($insultHit) {
         'Прошу прощения, извините если обидел Назовите город, бюджет или важные удобства — подберу вариант.',
     ];
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $insultReplies[array_rand($insultReplies)],
         'suggestions' => [],
@@ -1253,6 +1309,7 @@ if ($insultHit) {
 $intentComplaint = (bool) preg_match('/(?:смысл\s+(?:ты|вы)\s+(?:не\s+)?(?:уловил|понял|понимаешь|понимаете|схватил)|ты\s+(?:не\s+)?(?:понимаешь|понимаете|уловил|схватил|вникаешь)|вы\s+(?:не\s+)?(?:понимаете|уловили|вникаете)|какой\s+смысл\s+(?:ты|вы|вообще)\b|зачем\s+(?:ты|вы)\s+(?:тут|здесь|вообще)|что\s+ты\s+(?:вообще\s+)?(?:хочешь|имеешь\s+в\s+виду)|ни\s+фига\s+не\s+поним|ни\s+разу\s+не\s+поним|вообще\s+не\s+поним|тупищ|хрень\s+ты\s+пишешь|бред\s+(?:ты|вы)\s+пишешь|не\s+уловил|не\s+понял\s+смыл|какой\s+ты\s+(?:помощник|ассистент|бот)|нахер\s+надо|заел(?:ась)?|че\s+ты\s+заед|хватит\s+заедать|достал\s+ты|надоел|надоели)/ui', $textLower);
 if ($intentComplaint && !$insultHit) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Извините, если что-то не так! Я стараюсь быть полезным. Пожалуйста, перефразируйте — и я постараюсь помочь. Например: «отели в Москве до 10 000» или «забронировать номер в Праге».',
         'suggestions' => [],
@@ -1291,6 +1348,7 @@ if ($intentNegation && !$insultHit && !$intentRefinement) {
             $answer .= 'К сожалению, в ' . cityPrep($matchedCity) . ' пока нет отелей в каталоге.';
         }
         h_json([
+            'reset' => false,
             'ok' => true,
             'answer' => $answer,
             'suggestions' => $suggestions,
@@ -1303,6 +1361,7 @@ if ($intentNegation && !$insultHit && !$intentRefinement) {
         exit;
     } elseif ($matchedCity !== null) {
         h_json([
+            'reset' => false,
             'ok' => true,
             'answer' => 'Хорошо, убираю ' . cityPrep($matchedCity) . '. Какое направление интересует? Например: «отели в Москве» или «забронировать номер в Праге».',
             'suggestions' => [],
@@ -1317,6 +1376,7 @@ if ($intentNegation && !$insultHit && !$intentRefinement) {
     }
     if ($intentNegation && $hasActiveContext) {
         h_json([
+            'reset' => false,
             'ok' => true,
             'answer' => 'Хорошо, сбрасываю поиск. Если захотите подобрать отель — просто напишите город и даты.',
             'suggestions' => [],
@@ -1330,6 +1390,7 @@ if ($intentNegation && !$insultHit && !$intentRefinement) {
         exit;
     }
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Понял! Если передумаете — я здесь, помогу с подбором отеля.',
         'suggestions' => [],
@@ -1337,6 +1398,56 @@ if ($intentNegation && !$insultHit && !$intentRefinement) {
         'state' => 'IDLE',
         'hotel' => null,
         'hotelId' => null,
+        'filters' => ['city' => null, 'min' => null, 'max' => null, 'amenities' => [], 'type' => null, 'stars' => null],
+        'prefill' => [],
+    ]);
+    exit;
+}
+
+// --- «Какие есть города?» / «направления» — список доступных городов ---
+if (preg_match('/(?:какие|в\s+каких|все|перечисли|сколько(?:\s+всего)?)\s+(?:есть\s+)?(?:города|городов|направления|направлений)/ui', $textLower)
+    && !preg_match('/(?:отели?\s+(?:в|с)\b|гостиниц|забронир|бронь\b)/u', $textLower)) {
+    h_json([
+        'reset' => false,
+        'ok' => true,
+        'answer' => 'Мы работаем в ' . count($cities) . ' городах мира 🌍: ' . implode(', ', array_map(fn($c) => $c['name'], $cities)) . '. Назовите город — и я подберу отель!',
+        'suggestions' => [],
+        'flow' => null,
+        'state' => 'IDLE',
+        'hotel' => null, 'hotelId' => null,
+        'filters' => ['city' => null, 'min' => null, 'max' => null, 'amenities' => [], 'type' => null, 'stars' => null],
+        'prefill' => [],
+    ]);
+    exit;
+}
+
+// --- «Что такое Travel.ru?» / «чем занимаетесь» / «про сервис» ---
+if (preg_match('/(?:что\s+такое\s+travel|что\s+это\s+за\s+(?:сайт|сервис)|про\s+(?:travel|этот\s+сайт|сервис|ваш\s+сервис)|расскажи\s+(?:про|о)\s+(?:travel|сервис|сайте|свой\s+сервис)|о\s+travel\.ru|поговорим\s+о\s+travel)/ui', $textLower)) {
+    h_json([
+        'reset' => false,
+        'ok' => true,
+        'answer' => 'Travel.ru — сервис подбора и бронирования отелей по всему миру 🌍. Я помогу найти отель по городу, бюджету и удобствам (бассейн, спа, завтрак, вид на море и т.д.), сравнить варианты, посмотреть цены и даже оформить бронь прямо в чате. С чего начнём? Например: «покажи отели в Праге до 10 000» или «отель с бассейном в Сочи».',
+        'suggestions' => [],
+        'flow' => null,
+        'state' => 'IDLE',
+        'hotel' => null, 'hotelId' => null,
+        'filters' => ['city' => null, 'min' => null, 'max' => null, 'amenities' => [], 'type' => null, 'stars' => null],
+        'prefill' => [],
+    ]);
+    exit;
+}
+
+// --- Оффтоп / не по теме: вежливо переводим разговор к отелям ---
+if (preg_match('/(?:напиши|сочини|придумай|сложи|рифмуй)\s+(?:стих|поз[её]м|рассказ|истори(?:ю|я))|кто\s+президент|назови\s+столиц|какая\s+столиц|сколько\s+населен|какой\s+сегодня\s+(?:праздник|день\s+недели)|какая\s+(?:завтра|сегодня)\s+погод|какой\s+курс\s+(?:доллар|евро|валют)|реши\s+(?:пример|уравнен)|сколько\s+будет\s+\d|столица\s+франци|история\s+россии|кто\s+написал/ui', $textLower)
+    && !preg_match('/отел|гостиниц|бронь|забронир/ui', $textLower)) {
+    h_json([
+        'reset' => false,
+        'ok' => true,
+        'answer' => 'Хороший вопрос! 😊 Но я — ассистент по отелям и путешествиям, поэтому не силён в стихах, новостях и общих фактах. Зато отлично знаю отели: подберу по городу, цене и удобствам, сравню варианты и оформлю бронь. Скажите, например, «отели в Дубае» или «гостиница с бассейном в Барселоне» — и я всё сделаю!',
+        'suggestions' => [],
+        'flow' => null,
+        'state' => 'IDLE',
+        'hotel' => null, 'hotelId' => null,
         'filters' => ['city' => null, 'min' => null, 'max' => null, 'amenities' => [], 'type' => null, 'stars' => null],
         'prefill' => [],
     ]);
@@ -1359,6 +1470,7 @@ if ($countryCityClash && $matchedCountry !== null && $matchedCity !== null) {
     $options[] = ' Другую страну';
     $answer = $clashReplies[array_rand($clashReplies)] . implode("\n•", $options);
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $answer,
         'suggestions' => [],
@@ -1397,6 +1509,7 @@ if (preg_match('~^(\d[\d\s+\-*/.,()]*)\s*=\s*$~u', $mathText, $mEq)
         };
         $answer = is_float($result) ? rtrim(rtrim(number_format($result, 10, '.', ''), '0'), '.') : (string) $result;
         h_json([
+            'reset' => false,
             'ok' => true,
             'answer' => $answer,
             'suggestions' => [],
@@ -1414,6 +1527,7 @@ if (preg_match('/(?:без\s+арахис|без\s+глютен|без\s+лак�
     $answer = 'Я не могу гарантировать отсутствие аллергена по данным каталога — информацию о составе блюд подтверждает только сам отель. '
         . 'Выберите город, а перед бронированием обязательно уточните особенности питания на странице отеля или через поддержку.';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $answer,
         'suggestions' => [],
@@ -1428,6 +1542,7 @@ if (preg_match('/(?:без\s+арахис|без\s+глютен|без\s+лак�
 // «это не отель» / «я не про отели» — явный отказ от тематики
 if (preg_match('/(?:это\s+не\s+отел|я\s+не\s+про\s+отел|не\s+про\s+отел|это\s+не\s+про|это\s+про\s+(?:друг|математик|задач|программ|код))/ui', $textLower)) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Понял, я специализируюсь на отелях и бронировании. Если понадобится помочь с выбором жилья — обращайтесь!',
         'suggestions' => [],
@@ -1447,6 +1562,7 @@ if (preg_match('/кают|домик|домашн|хостел|hostel|guest\s*ho
     if (preg_match('/хостел|hostel/iu', $textLower)) $notAvailType = 'хостелов';
     if (preg_match('/кемпинг|палатк|camping/iu', $textLower)) $notAvailType = 'кемпингов';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'У нас нет ' . $notAvailType . ' в каталоге — мы работаем с отелями. Зато могу подобрать недорогой отель у моря или в центре города — какой город интересует?',
         'suggestions' => [],
@@ -1487,6 +1603,7 @@ if ($secHit !== null) {
         'Такая информация закрыта из соображений безопасности, показывать её я не могу Зато подобрать отель или оформить бронь — всегда готов! С какого города начнём?',
     ];
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $refusals[array_rand($refusals)],
         'suggestions' => [],
@@ -1509,6 +1626,7 @@ if ($intentEmotional) {
         'Извините, что не получилось с первого раза. Начнём сначала — какой город и даты интересуют?',
     ];
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $empathy[array_rand($empathy)],
         'suggestions' => [],
@@ -1521,13 +1639,21 @@ if ($intentEmotional) {
     exit;
 }
 
-$intentBook = (bool) preg_match('/(забронир|бронь|бронирован|забукировать|снять номер|хочу\s+снять|хочу\s+номер|свободн|койко|\bbook)/u', $textLower);
+$intentBook = (bool) preg_match('/(забронир|бронь|бронирован|забукировать|снять\s+номер|хочу\s+снять|хочу\s+забронир|оформить\s+брон|койко|\bbook)/u', $textLower);
+// Если контекст BOOKING_FLOW — любое содержательное сообщение продолжает бронирование
+if (!$intentBook && $ctxState === 'BOOKING_FLOW') {
+    $isContentful = $matchedCity !== null || $pDates !== null || $pGuests !== null || $pName !== null || $pPhone !== null
+        || preg_match('/да|ага|угу|ок|норм|подходит|беру|возьму|хочу|нужно|надо|ну|хорош|отлично/ui', $textLower);
+    if ($isContentful) $intentBook = true;
+}
 $intentCancel = (bool) preg_match('/отмен|возврат|cancel/u', $textLower);
 $intentShow = ((bool) preg_match('/покажи|открой|расскажи|подробнее|что за отель|про отель|сколько стоит|сколько стоят|стоят|цена отеля|\bпочем\b|цена|цены|по ценам|show|look at|what is/u', $textLower)
         || fuzzy_hit($textLower, ['покажи', 'открой', 'расскажи', 'подробнее', 'сколько', 'скинь', 'показывает', 'скажи', 'цена']))
     && !preg_match('/анекдот|шутк|рассмеши|смешн|joke|а\s+(?:какой|какие|какая|какое)\s+(?:рейтинг|рейтенг|отзыв|скидк)|расскажи\s+о\s+(?:себе|тебе|себя|тебя)|цена\s+вопрос|сколько\s+стоит\s+(?:фильм|книга|телефон|машин|дом)/ui', $textLower);
-$intentSearch = ($hasFilters || (bool) preg_match('/отели|отель|гостиниц|найди|подбери?|подбер|hotel|hotels/u', $textLower))
+$wantRoom = (bool) preg_match('/(?:хочу|нуж(?:ен|на|но)|ищу|подбери|найди|свободн\w*)\s+номер\w*|номер\w*\s+(?:с\s+вид|у\s+моря|возле|около|рядом|с\s+бассейн|с\s+завтрак|с\s+спа|с\s+балкон|с\s+террас|с\s+кондиционер)/ui', $textLower);
+$intentSearch = ($hasFilters || $wantRoom || (bool) preg_match('/отели|отель|гостиниц|найди|подбери?|подбер|hotel|hotels/u', $textLower))
     && !preg_match('/отель\s+это|отел[ья]\s+это|в\s+отеле|находится\s+в\s+отеле|работаю\s+в\s+отеле|живу\s+в\s+отеле|найди\s+(?:мне\s+)?(?:друг|подруг|знаком|жених)/ui', $textLower);
+$intentMap = (bool) preg_match('/покажи\s+(?:на\s+)?карт\w*|на\s+карте|где\s+на\s+карте|показать\s+на\s+карте/ui', $textLower);
 $showSuggestions = false;
 $noSearchState = false;
 
@@ -1604,6 +1730,7 @@ if ($intentChange) {
     $changeFlow = ($hasActiveContext && isset($changed) && !empty($changed)) ? 'book' : null;
     $changeState = ($hasActiveContext && isset($changed) && !empty($changed)) ? 'BOOKING_FLOW' : 'IDLE';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $answer,
         'suggestions' => $showSuggestions ? $suggestions : [],
@@ -1618,7 +1745,7 @@ if ($intentChange) {
 }
 
 // --- Информационные вопросы: «есть ли конференц-зал», «трансфер», «в отелях Сочи есть...» ---
-$intentInfo = (bool) preg_match('/(?:есть ли|есть\b|имеется|оборудован|оснащён|оснащен|предоставля|услуг\w*|конференц|банкетн|переговорн|трансфер|трансфера|автобус|шаттл|парковк\w*|паркинг|ваучер|купон|сертификат|промокод|скидк\w*|акци\w*|спецпредложени)/ui', $textLower)
+$intentInfo = (bool) preg_match('/(?:есть ли|имеется|оборудован|оснащён|оснащен|предоставля|услуг\w*|конференц|банкетн|переговорн|трансфер|трансфера|автобус|шаттл|парковк\w*|паркинг|ваучер|купон|сертификат)/ui', $textLower)
     && preg_match('/(?:отел|отеля|отелей|отелях|гостиниц|номер|номер[а-я]*|номеров)/ui', $textLower);
 if ($intentInfo && $matchedCity !== null) {
     $amenityAnswer = '';
@@ -1637,6 +1764,7 @@ if ($intentInfo && $matchedCity !== null) {
     }
     $amenitySuffix = ' Если хотите, я могу подобрать отель — просто скажите город и даты.';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $amenityAnswer . $amenitySuffix,
         'suggestions' => [],
@@ -1649,6 +1777,7 @@ if ($intentInfo && $matchedCity !== null) {
     exit;
 } elseif ($intentInfo && $matchedCity === null) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Эту информацию лучше уточнить у конкретного отеля. В каком городе ищете?',
         'suggestions' => [],
@@ -1669,6 +1798,7 @@ if ($matchedCity === null && $matchedCountry === null && !$intentNegation && !$i
         $answer = 'Уточните, пожалуйста: нужен конкретный город или страна — ' . implode(', ', $availableCountries)
             . '. Например: «Санторини» или «Анталия».';
         h_json([
+            'reset' => false,
             'ok' => true,
             'answer' => $answer,
             'suggestions' => [],
@@ -1685,6 +1815,7 @@ if ($matchedCity === null && $matchedCountry === null && !$intentNegation && !$i
 // Число + «ночей/ночь/ночи» — уточнение: бюджет за ночь или длительность поездки
 if (preg_match('/^\d+\s+ноч/ui', trim($textLower)) && !$intentBook && !$intentSearch && !$intentShow) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Уточните: вы имели в виду бюджет за ночь (например «до 10 000 за ночь») или длительность поездки (например «на 10 ночей в Праге»)?',
         'suggestions' => [],
@@ -1712,6 +1843,7 @@ if (preg_match('/(\d{1,6})\s+(?:на\s+)?(\d{1,2})\s+ноч/ui', $textLower, $mD
 // Просто число без контекста — уточнить
 if (preg_match('/^\d+$/', trim($textLower)) && !$intentBook && !$intentSearch && !$intentShow && $matchedCity === null) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Что означает это число? Бюджет за ночь, количество гостей или длительность поездки? Примеры: «до 10 000 за ночь», «2 гостя», «на 5 ночей».',
         'suggestions' => [],
@@ -1727,10 +1859,12 @@ if (preg_match('/^\d+$/', trim($textLower)) && !$intentBook && !$intentSearch &&
 
 // Определяем, является ли сообщение КОРОТКИМ и неясным (1-2 токена, нет городов/отелей/намерений)
 $tokensShort = preg_split('/[^\p{L}\p{N}]+/u', $textLower, -1, PREG_SPLIT_NO_EMPTY);
+$isShortGreeting = (bool) preg_match('/^(?:привет|здравствуй|добрый|хай|хелло|алё|алло|йо|салют|даров|здаров|приветик|ку|кхе|hello|hi|hey|yo|пока|бай|bye)$/ui', $textLower);
 $isShortUnclear = count($tokensShort) <= 1 && mb_strlen($textLower) < 3
-    && $matchedCity === null && $matchedCountry === null && !$intentBook && !$intentSearch && !$intentShow && !$intentHotelSelect;
+    && $matchedCity === null && $matchedCountry === null && !$intentBook && !$intentSearch && !$intentShow && !$intentHotelSelect && !$isShortGreeting;
 if ($isShortUnclear) {
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => 'Не совсем понял Вы хотите подобрать отель? Назовите город, например «отели в Сочи» или «забронируй номер в Праге».',
         'suggestions' => [],
@@ -1760,6 +1894,7 @@ if ($matchedCountry !== null && $matchedCity === null && !$intentBook && !$inten
     $suggestions = array_slice($countryCityHotels, 0, 3);
     $answer = 'В ' . $cp2 . ' доступны: ' . $cList . '. Какой город выбрать?';
     h_json([
+        'reset' => false,
         'ok' => true,
         'answer' => $answer,
         'suggestions' => $suggestions,
@@ -1810,9 +1945,25 @@ foreach ($amenityMap as $kw => $am) {
 }
 
 if ($resetContext) {
+    $_layer = 'regex';
     $showSuggestions = true;
     $suggestions = array_slice($pool, 0, 3);
     $answer = 'Сбросил прежние условия. Начинаем заново — назовите город, даты, бюджет или важные удобства.';
+} elseif ($intentMap) {
+    $mapHotel = null;
+    if ($contextHotel !== '') {
+        $mapHotel = find_hotel_by_name($contextHotel, $hotels);
+    }
+    if ($mapHotel === null) {
+        $mapHotel = find_hotel_by_name($text, $hotels);
+    }
+    if ($mapHotel !== null) {
+        $answer = 'Отель «' . $mapHotel['name'] . '» — на странице отеля есть интерактивная карта с расположением. Хотите забронировать?';
+        $showSuggestions = true;
+        $suggestions = [$mapHotel];
+    } else {
+        $answer = 'Подскажите, какой отель — и я направлю на его страницу с картой. Например: «Покажи на карте отель Метрополь».';
+    }
 } elseif ($intentCancel) {
     $answer = 'Отменить бронь можно бесплатно не позднее чем за 48 часов до заезда. Откройте «Мои бронирования» (/bookings.php), введите номер заявки и телефон, затем нажмите «Отменить бронь». Я не отменяю заявку без проверки данных владельца.';
 } elseif (!$hasActiveContext && preg_match('/сколько\s+(?:стоит|стоим|стоят)/ui', $textLower) && $matchedCity === null) {
@@ -1914,7 +2065,7 @@ if ($resetContext) {
     if (preg_match('/лучш|топ|все отели|^отели$/u', $textLower)) {
         $answer = 'Вот лучшие отели по рейтингу гостей — все проверенные варианты:';
     } elseif ($matchedCity !== null) {
-        $answer = 'Похоже, я не нашёл отель с таким названием. Зато вот лучшие отели в ' . cityPrep($matchedCity) . ':';
+        $answer = 'Лучшие отели в ' . cityPrep($matchedCity) . ' — вот лучшие варианты:';
     } elseif (preg_match('/цен\w*|сколько|стоит|стоят|почем|прайс/ui', $textLower)) {
         $answer = 'Нужен город, чтобы показать цены. В каком городе ищете отель?';
         $showSuggestions = false;
@@ -1997,6 +2148,7 @@ if ($resetContext) {
     // Проверка брони: «проверь бронь», «статус заявки», «моя бронь» — НЕ начинаем новое бронирование
     if (preg_match('/провер\w*\s+брон|статус\s+(?:брон|заявк)|моя\s+бронь|мои\s+брон\w*|где\s+(?:моя|мои)|подтверждени[ея]\s+брон|по\s+заказу\s+[A-Z0-9\-]+/ui', $textLower)) {
         h_json([
+            'reset' => false,
             'ok' => true,
             'answer' => 'Для проверки бронирования откройте «Мои бронирования» (/bookings.php) и введите номер заявки вместе с телефоном. Так чужие данные останутся закрыты.',
             'suggestions' => [],
@@ -2019,12 +2171,15 @@ if ($resetContext) {
     if ($bookHotel === null && preg_match('/отель\s*[№#]?\s*(\d{1,2})\b/u', $textLower, $m)) {
         foreach ($hotels as $h) { if ((int) $h['id'] === (int) $m[1]) { $bookHotel = $h; break; } }
     }
-    // «забронируй его» — отель из контекста
-    if ($bookHotel === null && $anaphora) {
+    // «забронируй его» — отель из контекста (по анафоре или продолжение бронирования)
+    if ($bookHotel === null && ($anaphora || $ctxState === 'BOOKING_FLOW')) {
         if ($contextHotelId > 0) {
             foreach ($hotels as $h) { if ((int) $h['id'] === $contextHotelId) { $bookHotel = $h; break; } }
         }
         if ($bookHotel === null && $contextHotel !== '') $bookHotel = find_hotel_by_name($contextHotel, $hotels);
+    }
+    if ($bookHotel !== null && $matchedCity === null) {
+        $matchedCity = $bookHotel['city'];
     }
     if ($pastDateMsg !== null) {
         $answer = $pastDateMsg;
@@ -2054,7 +2209,34 @@ if ($resetContext) {
         }
         if ($pGuests !== null) $confirmParts[] = $pGuests . ' ' . pluralGuests($pGuests);
         $confirmStr = $confirmParts ? ' (' . implode(', ', $confirmParts) . ')' : '';
-        $answer = 'Нашёл отель «' . $bookHotel['name'] . '»' . $confirmStr . ' —' . $priceLine . '. Бронируем?';
+        $isConfirmWord = (bool) preg_match('/^(?:да|ага|угу|конечно|точно|подтвержд|подтверждаю|подтвердить|хорош|ок|норм|беру|возьму|давай|yes|confirm|отлично)\b/ui', trim($textLower));
+        if ($isConfirmWord && $pDates !== null && $matchedCity !== null && $pName !== null && $pPhone !== null) {
+            $bookingData = [
+                'hotel_id' => (int) $bookHotel['id'],
+                'hotel_name' => $bookHotel['name'],
+                'city' => $matchedCity,
+                'checkin' => $pDates['checkin'],
+                'checkout' => $pDates['checkout'],
+                'guests' => (int) ($pGuests ?? 1),
+                'name' => $pName,
+                'phone' => $pPhone,
+            ];
+            $bookingResult = null;
+            $bookingError = null;
+            require __DIR__ . '/chat_booking.php';
+            if ($bookingResult !== null) {
+                $ref = $bookingResult['ref'] ?? '';
+                $confirmUrl = $bookingResult['confirmation_url'] ?? '/booking-confirm.php';
+                $answer = '🎉 Бронирование оформлено! Заявка #' . $ref . $confirmStr . ' —' . $priceLine . ".\n\n"
+                    . 'Откройте подтверждение: ' . $confirmUrl . "\n\n"
+                    . 'Отменить бронь можно не позднее 48 часов до заезда.';
+                $flow = null;
+            } else {
+                $answer = 'Не удалось оформить бронь: ' . ($bookingError ?: 'неизвестная ошибка') . '. Попробуйте ещё раз или укажите другие параметры.';
+            }
+        } else {
+            $answer = 'Нашёл отель «' . $bookHotel['name'] . '»' . $confirmStr . ' —' . $priceLine . '. Бронируем?';
+        }
         }
     } else {
         // Собираем все недостающие обязательные слоты в одном сообщении
@@ -2140,8 +2322,8 @@ if ($resetContext) {
     } else {
         $answer = 'Не нашёл отель по вашему выбору. Попробуйте нажать кнопку или написать «отель 8».';
     }
-} elseif (preg_match('/промокод|промо|скидк|купон|акци|код|promo|discount|coupon/ui', $textLower)) {
-    $hasNoPromo = (bool) preg_match('/(?:нет|нету|нулев|нулев|без|отсутств|пусто|никак)/ui', $textLower);
+} elseif (preg_match('/промокод|промо|скидк|купон|акци|код|promo|discount|coupon|бонус|привилеги|льгот|премия/ui', $textLower)) {
+    $hasNoPromo = (bool) preg_match('/(?:нет|нету|нулев|без|отсутств|пусто|никак)/ui', $textLower);
     if ($hasNoPromo) {
         $answer = "Промокоды могут меняться в зависимости от сезона и акций. Вот текущие:\nWELCOME10 — скидка 10% (для новых гостей)\nTRAVEL5 — скидка 500 ₽\nSKI15 — 15% на горнолыжные отели\n\nНе могу гарантировать актуальность — условия могут измениться. Попробуйте ввести при бронировании, система покажет, действует ли код.";
     } else {
@@ -2336,12 +2518,12 @@ if ($resetContext) {
         $answer = 'Расскажите подробнее, что хотите узнать про этот отель?';
     }
 } elseif ($contextHotel === '' && !empty($suggestions)
-    && preg_match('/(?:а\s+)?(?:какой|какие|какая|какое|рейтинг|рейтенг|отзыв|отзыв|скидк|акци|промо)/ui', $textLower)) {
+    && preg_match('/(?:а\s+)?(?:какой|какие|какая|какое|рейтинг|рейтенг|отзыв|скидк|акци|промо)/ui', $textLower)) {
     $first = $suggestions[0];
     $showSuggestions = true;
     $answer = 'Вот первый вариант — «' . $first['name'] . '» (' . $first['stars'] . '★, ' . $first['city']
         . ', рейтинг ' . ($first['rating'] ?? 0) . ', от ' . number_format((int) $first['price'], 0, '', ' ') . ' ₽/ночь). Подробнее — в карточке.';
-} elseif (preg_match('/(?:живот|голов|зуб|горл|спин|сустав|сердц|давлен|температур|болит|боль\s|болезн|недомог|тошн|рвот|кашел|насморк|простуд|грипп|аллерг|таблетк|врач|доктор|больниц|аптек|лечени|здоров|болезн|симптом|травм|перелом|ушиб)/ui', $textLower)) {
+} elseif (preg_match('/(?:живот|голов|зуб|горл|спин|сустав|сердц|давлен|температур|болит|боль\s|болезн|недомог|тошн|рвот|кашел|насморк|простуд|грипп|аллерг|таблетк|врач|доктор|больниц|аптек|лечени|здоров|симптом|травм|перелом|ушиб)/ui', $textLower)) {
     $answer = 'Я не медицинский помощник Если вам плохо или беспокоит острая боль — обратитесь к врачу или вызовите скорую. А вот когда поправитесь — помогу подобрать отель для восстановления! Куда хотели бы поехать?';
 } elseif (preg_match('/привет|здравству|добрый (день|вечер|утро)|хай|хелло|хэлло|алё|алло|ау|йо|\bку\b|салют|даров|здаров|здорово|приветик|hello|hi|hey|hola|yo/ui', $textLower)) {
     $greetings = [
@@ -2430,6 +2612,38 @@ if ($lastHotel === null && ($flow === 'book') && isset($bookHotel) && is_array($
     $lastHotel = $bookHotel;
 }
 
+// --- Three-layer architecture: compute confidence for LLM fallback ---
+$llmHint = false;
+if ($mlIntent !== null && $mlConfidence > 0) {
+    // ML classifier confidence is available
+    if ($mlConfidence < 0.5 && $matchedCity === null && $flow !== 'book') {
+        $llmHint = true;
+    }
+} else {
+    // No ML classifier — check if we fell through to generic fallback
+    if ($flow === null && $matchedCity === null && !empty($answer)) {
+        $llmHint = true;
+    }
+}
+
+// --- Logging to data/chat.log ---
+$_logFile = data_path('chat.log');
+$_logEntry = [
+    'ts' => date('c'),
+    'text' => mb_substr($text, 0, 200),
+    'layer' => $_layer,
+    'ml_intent' => $mlIntent,
+    'ml_conf' => $mlConfidence,
+    'ml_city' => $mlEntities['city'] ?? null,
+    'ml_amenities' => $mlEntities['amenities'] ?? [],
+    'ml_guests' => $mlEntities['guests'] ?? null,
+    'city' => $matchedCity,
+    'state' => $outState,
+    'answer_len' => mb_strlen($answer ?? ''),
+    'time_ms' => round((microtime(true) - $_chatStart) * 1000, 1),
+];
+@file_put_contents($_logFile, json_encode($_logEntry, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
+
 h_json([
     'ok' => true,
     'reset' => $resetContext,
@@ -2451,4 +2665,30 @@ h_json([
         'minRating' => $minRating,
     ],
     'prefill' => $prefill,
+    'ml_entities' => [
+        'city' => $matchedCity,
+        'hotel' => $lastHotel['name'] ?? null,
+        'price_min' => $minPrice,
+        'price_max' => $maxPrice,
+        'amenities' => array_keys($wantedAmenities),
+        'type' => $wantedType,
+        'stars' => $stars,
+        'guests' => $guests ?? null,
+        'checkin' => $checkin ?? $mlEntities['checkin'] ?? null,
+        'checkout' => $checkout ?? $mlEntities['checkout'] ?? null,
+        'ml_city' => $mlEntities['city'] ?? null,
+        'ml_amenities' => $mlEntities['amenities'] ?? [],
+        'ml_stars' => $mlEntities['stars'] ?? null,
+        'ml_guests' => $mlEntities['guests'] ?? null,
+    ],
+    'ml_answer' => $answer,
+    'confidence' => $mlConfidence,
+    'llm_hint' => $llmHint,
+    '_debug' => [
+        'layer' => $_layer,
+        'ml_intent' => $mlIntent,
+        'ml_confidence' => $mlConfidence,
+        'ml_time_ms' => $_mlTime,
+        'total_time_ms' => round((microtime(true) - $_chatStart) * 1000, 1),
+    ],
 ]);
