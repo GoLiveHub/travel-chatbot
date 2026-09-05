@@ -4,6 +4,7 @@ RUN a2enmod rewrite
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
+    libonig-dev \
     && docker-php-ext-install zip mbstring \
     && rm -rf /var/lib/apt/lists/*
 
