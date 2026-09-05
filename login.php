@@ -55,7 +55,7 @@ if (auth_user()) {
 
         <!-- Логотип -->
         <a href="/" class="mb-7 flex items-center justify-center gap-2 text-xl font-extrabold text-slate-900" aria-label="Travel.ru — на главную">
-            <span class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white">✈</span>
+            <span class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7z"></path></svg></span>
             <span>Travel<span class="text-teal-500">.ru</span></span>
         </a>
 

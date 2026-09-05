@@ -38,7 +38,7 @@ $guests = max(1, min(8, (int) ($_GET['guests'] ?? 2)));
             <form id="search-city-form" class="mb-6" autocomplete="off">
                 <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_1fr_1fr_.65fr_auto]">
                     <div class="relative sm:col-span-2 xl:col-span-1">
-                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">📍</span>
+                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></span>
                         <input type="text" id="search-city" list="search-city-list" value="<?= htmlspecialchars($city) ?>" placeholder="Город: Сочи, Париж, Рим…" class="w-full rounded-xl border border-slate-300 bg-white px-10 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none">
                         <datalist id="search-city-list">
                             <?php foreach ($cities as $c): ?>
@@ -63,7 +63,7 @@ $guests = max(1, min(8, (int) ($_GET['guests'] ?? 2)));
 
             <div id="hotel-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
             <div id="empty-state" class="hidden rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
-                <div class="text-4xl">🔍</div>
+                <div class="flex justify-center text-slate-300"><svg class="h-14 w-14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></div>
                 <p class="mt-3 font-semibold text-slate-600">По вашим фильтрам ничего не нашлось</p>
                 <p class="mt-1 text-sm text-slate-400">Попробуйте ослабить условия поиска</p>
                 <button id="empty-reset" class="mt-4 rounded-full bg-teal-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-teal-600">Сбросить фильтры</button>

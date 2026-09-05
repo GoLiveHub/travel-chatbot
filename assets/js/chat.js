@@ -11,11 +11,11 @@
   if (!widget || !chips) return;
 
   const QUICK_CHIPS = [
-    '🏖 Отель у моря в Сочи',
-    '💰 Отели до 10 000 ₽',
-    '⭐ Лучшие отели',
-    '🎟 Как получить промокод?',
-    '🔐 Забронировать отель',
+    'Отель у моря в Сочи',
+    'Отели до 10 000 ₽',
+    'Лучшие отели',
+    'Как получить промокод?',
+    'Забронировать отель',
   ];
 
   const TYPE_LABELS = { beach: 'пляжный', mountain: 'горный', city: 'городской' };
@@ -64,7 +64,7 @@
     widget.classList.add('flex');
     toggleBtn.classList.add('hidden');
     if (messages.childElementCount === 0) {
-      addMsg('bot', 'Привет! 👋 Я ассистент Travel.ru. Подберу отель по городу, цене и удобствам и оформлю бронь прямо в чате. Что ищете?');
+      addMsg('bot', 'Привет! Я ассистент Travel.ru. Подберу отель по городу, цене и удобствам и оформлю бронь прямо в чате. Что ищете?');
       addChips(QUICK_CHIPS);
     }
     setTimeout(() => { if (input) input.focus(); }, 50);
@@ -243,14 +243,14 @@
     list.forEach((h) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.textContent = '🏨 ' + h.name;
+      b.textContent = h.name;
       b.className = 'max-w-full truncate rounded-full border border-teal-300 bg-teal-50 px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-100';
       b.title = h.city + ' · ' + (typeof window !== 'undefined' && window.travelCurrency ? window.travelCurrency.format(h.price) : h.price + ' ₽') + ' / ночь';
       b.addEventListener('click', async () => {
         if (busy) return;
         busy = true;
         try {
-          addMsg('user', '🏨 ' + h.name);
+          addMsg('user', h.name);
           await pickHotel(h.id);
         } finally {
           busy = false;
@@ -268,7 +268,7 @@
     flow.checkout = fmtISO(b);
     flow.nights = 2;
     flow.step = 'guests';
-    addMsg('user', '📅 Стандартные даты (+2 нед.)');
+    addMsg('user', 'Стандартные даты (+2 нед.)');
     addMsg('bot', 'Сколько гостей?');
     updateFlowChips();
   }
@@ -276,14 +276,14 @@
   function setGuests(g) {
     flow.guests = g;
     flow.step = 'promo';
-    addMsg('user', '👤 ' + g + (g === 1 ? ' гость' : ' гостя'));
+    addMsg('user', g + (g === 1 ? ' гость' : ' гостя'));
     addMsg('bot', 'Есть промокод? Если да — введите его, иначе нажмите «Нет промокода».');
     updateFlowChips();
   }
 
   function skipPromo() {
     flow.promo = '';
-    addMsg('user', '🎟 Нет промокода');
+    addMsg('user', 'Нет промокода');
     showConfirm();
   }
 
@@ -295,26 +295,26 @@
         else addChips([]);
         break;
       case 'dates':
-        addChips([{ label: '📅 Стандартные даты (+2 нед.)', onClick: useDefaultDates }]);
+        addChips([{ label: 'Стандартные даты (+2 нед.)', onClick: useDefaultDates }]);
         break;
       case 'guests':
         addChips([
-          { label: '👤 2 гостя', onClick: () => setGuests(2) },
-          { label: '👤 1 гость', onClick: () => setGuests(1) },
-          { label: '👤 3 гостя', onClick: () => setGuests(3) },
+          { label: '2 гостя', onClick: () => setGuests(2) },
+          { label: '1 гость', onClick: () => setGuests(1) },
+          { label: '3 гостя', onClick: () => setGuests(3) },
         ]);
         break;
       case 'promo':
-        addChips([{ label: '🎟 Нет промокода', onClick: skipPromo }]);
+        addChips([{ label: 'Нет промокода', onClick: skipPromo }]);
         break;
       case 'confirm':
         addChips([
-          { label: '✅ Да, всё верно', onClick: confirmBooking },
-          { label: '✏️ Изменить данные', onClick: startChange },
+          { label: 'Да, всё верно', onClick: confirmBooking },
+          { label: 'Изменить данные', onClick: startChange },
         ]);
         break;
       case 'change':
-        addChips([{ label: '✅ Всё верно, подтвердить', onClick: confirmBooking }]);
+        addChips([{ label: 'Всё верно, подтвердить', onClick: confirmBooking }]);
         break;
       default:
         addChips([]);
@@ -599,7 +599,7 @@
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Ошибка');
       const total = new Intl.NumberFormat('ru-RU').format(data.total) + ' ₽';
-      addMsg('bot', '🎉 Бронь оформлена! Заявка № ' + data.ref + ' на сумму ' + total +
+      addMsg('bot', 'Бронь оформлена! Заявка № ' + data.ref + ' на сумму ' + total +
         (data.discount ? ' (скидка −' + new Intl.NumberFormat('ru-RU').format(data.discount) + ' ₽ по коду ' + data.promo + ')' : '') +
         '. Подтверждение уже отправлено.');
       addLinkBubble('Смотреть подтверждение →', data.confirmation_url || ('/bookings.php'));
@@ -658,12 +658,12 @@
     };
     saveCtx();
     flow.step = 'confirm';
-    addMsg('bot', '📋 Подтвердите бронирование:\n' +
-      '🏨 ' + (flow.hotelName || 'Отель ' + flow.hotelId) + '\n' +
-      '📅 ' + fmtHuman(flow.checkin) + ' – ' + fmtHuman(flow.checkout) + ' · ' + flow.nights + ' ' + pluralNights(flow.nights) + '\n' +
-      '👥 Гостей: ' + flow.guests + '\n' +
-      '👤 ' + flow.name + ' · ' + flow.phone +
-      (flow.promo ? '\n🎟 Промокод: ' + flow.promo : '') +
+    addMsg('bot', 'Подтвердите бронирование:\n' +
+      (flow.hotelName || 'Отель ' + flow.hotelId) + '\n' +
+      fmtHuman(flow.checkin) + ' – ' + fmtHuman(flow.checkout) + ' · ' + flow.nights + ' ' + pluralNights(flow.nights) + '\n' +
+      'Гостей: ' + flow.guests + '\n' +
+      flow.name + ' · ' + flow.phone +
+      (flow.promo ? '\nПромокод: ' + flow.promo : '') +
       '\n\nВсё верно? Ответьте «да», или скажите, что изменить (например «отель 8», «другие даты»).');
     updateFlowChips();
   }

@@ -42,7 +42,7 @@ $total = count($hotels);
     </div>
 
     <div id="fav-empty" class="<?= $favHotels ? 'hidden' : '' ?> rounded-2xl border border-dashed border-slate-300 bg-white py-20 text-center">
-        <div class="text-5xl">💙</div>
+        <div class="flex justify-center text-slate-300"><svg class="h-16 w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9a4.7 4.7 0 0 1 8.6-2.6A4.7 4.7 0 0 1 21.3 11.5c-1.8 4.4-9.3 9-9.3 9z"></path></svg></div>
         <p class="mt-4 text-lg font-semibold text-slate-700">В избранном пока пусто</p>
         <p class="mt-1 text-sm text-slate-400">Нажимайте на сердечко в карточке отеля, чтобы сохранить его здесь.</p>
         <a href="/search.php" class="mt-6 inline-block rounded-full bg-gradient-to-r from-blue-600 to-teal-500 px-8 py-3 font-semibold text-white transition hover:shadow-lg">Подобрать отель</a>

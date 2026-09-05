@@ -26,7 +26,7 @@ $cancelled = $entry && ($entry['status'] ?? 'confirmed') === 'cancelled';
 <main class="mx-auto max-w-2xl px-4 py-12 sm:px-6">
     <?php if (!$entry): ?>
         <div class="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
-            <div class="text-5xl">🔎</div>
+            <div class="flex justify-center text-slate-300"><svg class="h-16 w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></div>
             <h1 class="mt-4 text-2xl font-extrabold text-slate-900">Заявка не найдена</h1>
             <p class="mt-2 text-slate-500">Проверьте номер бронирования или оформите новую заявку.</p>
             <a href="/search.php" class="mt-6 inline-block rounded-full bg-gradient-to-r from-blue-600 to-teal-500 px-8 py-3 font-semibold text-white transition hover:shadow-lg">Подобрать отель</a>

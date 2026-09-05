@@ -118,7 +118,7 @@ try {
 
 <?php if ($notFound ?? false): ?>
 <main class="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
-    <div class="text-6xl">🗺</div>
+    <div class="flex justify-center text-slate-300"><svg class="h-16 w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 7v11l6-4 6 4 6-4V7l-6 4-6-4z"></path><path d="M9 7v11"></path><path d="M15 11v11"></path></svg></div>
     <h1 class="mt-4 text-3xl font-extrabold text-slate-900">Отель не найден</h1>
     <p class="mt-2 text-slate-500">Возможно, он был удалён или ссылка неверна.</p>
     <a href="/search.php" class="mt-6 inline-block rounded-full bg-gradient-to-r from-blue-600 to-teal-500 px-8 py-3 font-semibold text-white">К списку отелей</a>
@@ -178,7 +178,7 @@ $extraImgs = array_slice($hotel['images'] ?? [], 0, 4);
             </div>
 
             <div class="mt-4 flex flex-wrap gap-2">
-                <button id="share-btn" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">🔗 Поделиться</button>
+                <button id="share-btn" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Поделиться</button>
                 <a href="https://wa.me/?text=<?= urlencode('Отель «' . $hotel['name'] . '» — ' . $hotel['city'] . '. Смотреть: ' . $baseUrl . '/hotel.php?id=' . $hotel['id']) ?>" target="_blank" rel="noopener" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">WhatsApp</a>
                 <a href="https://t.me/share/url?url=<?= urlencode($baseUrl . '/hotel.php?id=' . $hotel['id']) ?>&amp;text=<?= urlencode('Отель «' . $hotel['name'] . '» — ' . $hotel['city']) ?>" target="_blank" rel="noopener" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Telegram</a>
             </div>

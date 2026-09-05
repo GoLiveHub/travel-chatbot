@@ -13,7 +13,7 @@ $currentUser = auth_user();
 <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <a href="/" class="flex items-center gap-2 text-xl font-extrabold text-slate-900">
-            <span class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white">✈</span>
+            <span class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7z"></path></svg></span>
             <span>Travel<span class="text-teal-500">.ru</span></span>
         </a>
 
@@ -25,8 +25,8 @@ $currentUser = auth_user();
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3">
-            <a href="/search.php" class="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 md:hidden" aria-label="Поиск отелей" title="Поиск отелей">⌕</a>
-            <a href="/bookings.php" class="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Мои бронирования" title="Мои бронирования">▣</a>
+            <a href="/search.php" class="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 md:hidden" aria-label="Поиск отелей" title="Поиск отелей"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></a>
+            <a href="/bookings.php" class="grid h-10 w-10 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Мои бронирования" title="Мои бронирования"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></a>
             <?php if ($currentUser): ?>
                 <div class="relative" id="user-menu-wrap">
                     <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-teal-500 text-sm font-bold text-white shadow-sm transition hover:shadow-md" title="<?= htmlspecialchars($currentUser['name']) ?>">
@@ -61,8 +61,8 @@ $currentUser = auth_user();
                 </a>
             <?php endif; ?>
             <button id="theme-toggle" aria-label="Переключить тему" class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" title="Тёмная тема">
-                <span id="theme-moon" class="text-lg leading-none">🌙</span>
-                <span id="theme-sun" class="hidden text-lg leading-none">☀️</span>
+                <span id="theme-moon" class="grid h-5 w-5 place-items-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+                <span id="theme-sun" class="hidden grid h-5 w-5 place-items-center text-lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.9" y1="4.9" x2="7.3" y2="7.3"></line><line x1="16.7" y1="16.7" x2="19.1" y2="19.1"></line><line x1="4.9" y1="19.1" x2="7.3" y2="16.7"></line><line x1="16.7" y1="7.3" x2="19.1" y2="4.9"></line></svg></span>
             </button>
             <select id="currency-select" aria-label="Валюта" title="Курс: 1 $ ≈ 92 ₽, 1 € ≈ 100 ₽ (демо)" class="rounded-full border border-slate-200 px-2 py-1.5 text-sm font-semibold text-slate-600 focus:border-teal-500 focus:outline-none">
                 <option value="RUB">₽</option>

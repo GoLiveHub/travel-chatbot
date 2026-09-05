@@ -45,7 +45,7 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
         <!-- Поисковая форма -->
         <form id="hero-search" action="/search.php" method="get" class="mx-auto mt-8 grid max-w-5xl gap-2 rounded-2xl bg-white/95 p-3 text-left shadow-2xl backdrop-blur sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_.7fr_auto]">
             <div class="relative">
-                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">📍</span>
+                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></span>
                 <input type="text" name="city" list="city-list" id="hero-city" placeholder="Куда едем?" aria-label="Город" class="w-full rounded-xl border border-slate-200 bg-white px-10 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none">
                 <datalist id="city-list">
                     <?php foreach ($cities as $c): ?>
@@ -66,9 +66,9 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
         </form>
 
         <div class="mt-6 flex flex-wrap justify-center gap-2 text-sm">
-            <a href="/search.php?type=beach" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">🏖 Пляжный отдых</a>
-            <a href="/search.php?type=mountain" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">⛷ Горнолыжный</a>
-            <a href="/search.php" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">🏙 Все отели</a>
+            <a href="/search.php?type=beach" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Пляжный отдых</a>
+            <a href="/search.php?type=mountain" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Горнолыжный</a>
+            <a href="/search.php" class="rounded-full bg-white/15 px-4 py-1.5 text-white backdrop-blur transition hover:bg-white/30">Все отели</a>
         </div>
     </div>
 </section>
@@ -170,17 +170,17 @@ $defaultCheckout = date('Y-m-d', strtotime('+16 days'));
     <h2 class="text-center text-3xl font-extrabold text-slate-900">Почему Travel.ru?</h2>
     <div class="mt-8 grid gap-6 sm:grid-cols-3">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-            <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-2xl">🛡</div>
+            <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s6-3.5 6-8V6l-6-3-6 3v8c0 4.5 6 8 6 8z"></path><path d="M9 12l2 2 4-4"></path></svg></div>
             <h3 class="mt-4 font-bold text-slate-900">Безопасная бронь</h3>
             <p class="mt-2 text-sm text-slate-500">Подтверждение бронирования сразу, честные цены без скрытых платежей.</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-            <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-2xl">🤖</div>
+            <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a19.5 19.5 0 0 1 9.8-2.2c3.4 0 6.7 1.4 9.2 2.2"></path><path d="M12 13.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4z"></path></svg></div>
             <h3 class="mt-4 font-bold text-slate-900">Умный помощник</h3>
             <p class="mt-2 text-sm text-slate-500">Чат-бот подберёт отель по вашим пожеланиям на естественном языке.</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-            <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-2xl">💬</div>
+            <div class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
             <h3 class="mt-4 font-bold text-slate-900">Поддержка 24/7</h3>
             <p class="mt-2 text-sm text-slate-500">Отвечаем на вопросы до, во время и после поездки.</p>
         </div>

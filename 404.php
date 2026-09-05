@@ -23,7 +23,7 @@ $popular = array_slice($hotels, 0, 3);
 
 <main class="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
     <div class="text-7xl font-extrabold tracking-tight text-slate-200">404</div>
-    <div class="-mt-6 text-5xl">🧭</div>
+    <div class="-mt-6 flex justify-center text-slate-300"><svg class="h-16 w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5" fill="currentColor" stroke-width="0"></polygon></svg></div>
     <h1 class="mt-4 text-3xl font-extrabold text-slate-900">Кажется, вы сбились с пути</h1>
     <p class="mt-2 text-slate-500">Страница не найдена или была удалена. Зато отличные отели никуда не делись.</p>
     <div class="mt-6 flex flex-wrap justify-center gap-3">

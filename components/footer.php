@@ -3,7 +3,7 @@
     <div class="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
         <div>
             <div class="flex items-center gap-2 text-lg font-extrabold text-slate-900">
-                <span class="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-r from-blue-600 to-teal-500 text-white">✈</span>
+                <span class="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-r from-blue-600 to-teal-500 text-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7z"></path></svg></span>
                 Travel.ru
             </div>
             <p class="mt-3 text-sm text-slate-500">Умный поиск отелей по всему миру. Пляжный, горнолыжный и городской отдых — в одном месте.</p>
@@ -51,7 +51,7 @@
 <div id="chat-widget" role="dialog" aria-label="Помощник по подбору отелей" class="fixed bottom-5 right-5 z-50 hidden w-80 max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl" style="max-height: 520px;">
     <div class="flex items-center justify-between bg-gradient-to-r from-blue-600 to-teal-500 px-4 py-3 text-white">
         <div class="flex items-center gap-2">
-            <span class="grid h-8 w-8 place-items-center rounded-full bg-white/20">🤖</span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white/20"><svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></span>
             <div>
                 <div class="text-sm font-bold">Чат-помощник</div>
                 <div class="text-xs text-white/80">онлайн</div>
@@ -63,7 +63,7 @@
     <div id="chat-chips" class="flex flex-wrap gap-1.5 border-t border-slate-100 bg-slate-50 px-3 py-2"></div>
     <form id="chat-form" class="flex gap-2 border-t border-slate-200 bg-white p-3">
         <input id="chat-input" type="text" maxlength="500" autocomplete="off" aria-label="Сообщение помощнику" placeholder="Например: недорогой отель в Риме…" class="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm focus:border-teal-500 focus:outline-none">
-        <button type="submit" aria-label="Отправить сообщение" class="rounded-full bg-gradient-to-r from-blue-600 to-teal-500 px-4 py-2 text-white transition hover:shadow">➤</button>
+        <button type="submit" aria-label="Отправить сообщение" title="Отправить" class="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-r from-blue-600 to-teal-500 text-white transition hover:shadow"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2L15 22 11 13 2 9z"></path></svg></button>
     </form>
 </div>
 <style>

@@ -190,7 +190,7 @@
       const url = location.href;
       const done = () => {
         shareBtn.textContent = '✓ Ссылка скопирована';
-        setTimeout(() => { shareBtn.textContent = '🔗 Поделиться'; }, 2000);
+        setTimeout(() => { shareBtn.textContent = 'Поделиться'; }, 2000);
       };
       try { await navigator.clipboard.writeText(url); done(); }
       catch (err) {
