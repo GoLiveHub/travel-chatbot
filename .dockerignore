@@ -16,7 +16,9 @@ data/reviews.log
 data/users.json
 data/rate_limits/
 data/chat.json
+data/chat.log
+data/gen_log.txt
+data/dataset*.jsonl
 data/ml_model.cache
 vendor/
-composer.lock
 node_modules/
